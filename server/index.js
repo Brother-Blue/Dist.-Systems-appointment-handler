@@ -11,7 +11,7 @@ const router = require('router');
 dotenv.config();
 
 // Connect to MongoDB
-mongoose.connecct(process.env.MONGO_URI, {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }, (err) => {
