@@ -1,4 +1,4 @@
-const mongoose = require('mmongoose');
+const mongoose = require('mongoose');
 
 var userSchema = new Schema ({
     name: {type: String},
