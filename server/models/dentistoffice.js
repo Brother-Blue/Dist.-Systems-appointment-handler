@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 var dentistofficeSchema = new Schema ({
     name: {type: String},
