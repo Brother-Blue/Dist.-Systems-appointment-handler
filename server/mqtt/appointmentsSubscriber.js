@@ -4,6 +4,7 @@ const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
 const deviceRoot = 'root/';
 
+dotenv.config();
 
 const subscriber = mqtt.connect({
     host: process.env.MQTT_HOST,
@@ -24,14 +25,40 @@ subscriber.on('connect', (err) => {
   })
 
   subscriber.on('message', (topic, message) => {
-    data = json.parse(message)
-    if(data.method == add){
-      insertAppointment(data)
+    var data = JSON.parse(message)
+
+    switch(data.method) {
+      case 'add':
+        insertAppointment(data);
+        break;
+      case 'getAll':
+        getAllAppointments(data);
+        break;
+      case 'getOne':
+        getAppointment(data);
+        break;
     }
   })
 
   const insertAppointment = (data) => {
     db.collection('appointments').insertOne({
-      // TODO: add appropriate data to be
+      patient: data.patient,
+      dentistOffice: data.dentistOffice,
+      date: data.date
+    })
+  }
+
+  const getAllAppointments = () => {
+    db.collection('appointments').find({}).toArray((err, appointment) => {
+      if(err) console.error(err);
+      var message = JSON.stringify(appointment)
+      subscriber.publish('root/appointments', message)
+    })
+  }
+  const getAppointment = (appointmentID) => {
+    db.collection('appointments').find({ _id: appointmentID}).toArray((err, appointment) => {
+      if(err) console.error(err)
+      var message = JSON.stringify(appointment)
+      subscriber.publish('root/appointments', message)
     })
   }
