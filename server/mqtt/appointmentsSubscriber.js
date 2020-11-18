@@ -15,7 +15,7 @@ const subscriber = mqtt.connect({
 
 mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.net/Cluster0?retryWrites=true&w=majority", { useUnifiedTopology: true }, (err, client) => {
   if (err) return console.error(err);
-  db = client.db('root-appointments');
+  db = client.db('root-test');
 });
 
 subscriber.on('connect', (err) => {
@@ -32,10 +32,11 @@ subscriber.on('connect', (err) => {
         insertAppointment(data);
         break;
       case 'getAll':
-        getAllAppointments(data);
+        getAllAppointments();
         break;
       case 'getOne':
-        getAppointment(data);
+        //TODO figure out how to get and send the _id of each appointment
+        getAppointment();
         break;
     }
   })
@@ -46,19 +47,24 @@ subscriber.on('connect', (err) => {
       dentistOffice: data.dentistOffice,
       date: data.date
     })
+    console.log('HEYHO')
   }
 
   const getAllAppointments = () => {
-    db.collection('appointments').find({}).toArray((err, appointment) => {
+    db.collection('appointments').find({}).toArray((err, appointments) => {
       if(err) console.error(err);
-      var message = JSON.stringify(appointment)
+      var message = JSON.stringify(appointments)
       subscriber.publish('root/appointments', message)
+      console.log(appointments)
     })
+    
   }
   const getAppointment = (appointmentID) => {
     db.collection('appointments').find({ _id: appointmentID}).toArray((err, appointment) => {
       if(err) console.error(err)
       var message = JSON.stringify(appointment)
       subscriber.publish('root/appointments', message)
+      console.log(appointment)
     })
+    
   }
