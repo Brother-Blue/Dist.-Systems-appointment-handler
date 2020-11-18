@@ -28,17 +28,19 @@ subscriber.on('message', (topic, message) => {
     var data = JSON.parse(message)
     var method = data.method
 
-    if(method == 'add'){
-        insertDentistOffice(data);
+    switch(method) {
+        case 'add':
+            insertDentistOffice(data);
+            break;
+        case 'getAll':
+            getAllDentistOffices(data);
+            break;
+        case 'getOne': 
+            getDentistOffice(data.id);
+            break;
+        default:
+            return console.log('Invalid method')
     }
-    if(method == 'getAll'){
-        getAllDentistOffices();
-    }
-    if(method == 'getOne'){
-        getDentistOffice(data.id);
-    }
-
-    // TODO switchcase for the different methods here
 })
 
 const insertDentistOffice = (data) => {
