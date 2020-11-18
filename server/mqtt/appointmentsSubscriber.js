@@ -32,6 +32,6 @@ subscriber.on('connect', (err) => {
 
   const insertAppointment = (data) => {
     db.collection('appointments').insertOne({
-      // TODO: add appropriate data to be inserted.
+      // TODO: add appropriate data to be
     })
   }
