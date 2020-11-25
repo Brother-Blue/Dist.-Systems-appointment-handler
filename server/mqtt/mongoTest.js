@@ -1,6 +1,7 @@
 const mqtt = require('mqtt');
 const dotenv = require('dotenv');
 const mongodb = require('mongodb');
+const jsonParser = require('../files/jsonParser.js')
 const mongoClient = mongodb.MongoClient;
 const deviceRoot = 'root/';
 
