@@ -1,5 +1,10 @@
-const fs = require('fs');
+const fetch = require('node-fetch');
 
-let rawdata = fs.readFileSync('../files/dentistRegistry.json');
-let dentistRegistryFile = JSON.parse(rawdata);
-console.log(dentistRegistryFile);
+let url = "https://raw.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
+let settings = { method: "Get" };
+
+fetch(url, settings)
+    .then(res => res.json())
+    .then((json) => {
+        console.log(json);
+});
