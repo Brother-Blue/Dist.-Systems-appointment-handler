@@ -8,15 +8,47 @@ const client = mqtt.connect({
   port: process.env.MQTT_PORT
 });
 
-const topic = 'root/user';
-const message = JSON.stringify({
+const userTopic = 'root/user';
+const userMessage = JSON.stringify({
     name: "Bob",
-    method: "add",
     ssn: "199912121234",
-    emailaddress: "nonya@test.com"
+    emailaddress: "nonya@test.com",
+    method: "add"
+});
+
+const dentistTopic = 'root/dentistoffice';
+const dentistMessage = JSON.stringify({
+  id: "987",
+  name: "Bob's Dental",
+  owner: "Bob Bobson",
+  dentists: ["Me", "Myself", "I"],
+  address: "123 Toothy Hurty Avenue",
+  city: "Dubai",
+  coordinate: {
+    latitude: "12.3456",
+    longitude: "18.7654"
+  },
+  openinghours: {
+    monday: "10:00-18:30",
+    tuesday: "10:00-18:30",
+    wednesday: "9:00-18:30",
+    thursday: "9:00-18:30",
+    friday: "8:00-14:30"
+  },
+  method: "add"
+});
+
+const appointmentTopic = 'root/appointment';
+const appointmentMessage = JSON.stringify({
+  patient: "199912121234",
+  dentistOffice: "987",
+  date: new Date("2020-11-30T10:30:00.000Z"),
+  method: "add"
 });
 
 client.on('connect', () => {
   console.log(' >> Publisher connected...');
-  client.publish(topic, message);
+  client.publish(userTopic, userMessage);
+  client.publish(dentistTopic, dentistMessage);
+  client.publish(appointmentTopic, appointmentMessage);
 });

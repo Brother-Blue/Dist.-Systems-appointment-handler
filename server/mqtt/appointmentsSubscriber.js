@@ -20,7 +20,7 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 
 subscriber.on('connect', (err) => {
     subscriber.subscribe(deviceRoot + 'appointment');
-    console.log('Subscribed to root/appointment');
+    console.log(' >> Subscribed to root/appointment');
   })
 
   subscriber.on('message', (topic, message) => {
@@ -46,7 +46,7 @@ subscriber.on('connect', (err) => {
       dentistOffice: data.dentistOffice,
       date: data.date
     })
-    console.log('HEYHO')
+    console.log(' > Appointment added.')
   }
 
   const getAllAppointments = () => {

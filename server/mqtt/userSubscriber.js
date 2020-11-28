@@ -20,7 +20,7 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 
 subscriber.on('connect', (err) => {
     subscriber.subscribe(deviceRoot + 'user');
-    console.log('Subscribed to root/user');
+    console.log(' >> Subscribed to root/user');
 })
 
 subscriber.on('message', (topic, message) => {
@@ -43,15 +43,16 @@ subscriber.on('message', (topic, message) => {
 })
 
 const insertUser = (data) => {
-    db.collection('user').insertOne({
+    db.collection('users').insertOne({
         ssn: data.ssn,
         name: data.name,
         emailaddress: data.emailaddress
     })
+    console.log(' > User added.')
 }
 
 const getAllUsers = () => {
-    db.collection('user').find({}).toArray((err, user) => {
+    db.collection('users').find({}).toArray((err, user) => {
         if(err) console.error(err);
         var message = JSON.stringify(user)
         subscriber.publish('user', message)
@@ -59,7 +60,7 @@ const getAllUsers = () => {
 }
 
 const getUser = (userSsn) => {
-    db.collection('user').find({ ssn: userSsn }).toArray((err, user) => {
+    db.collection('users').find({ ssn: userSsn }).toArray((err, user) => {
         if(err) console.error(err);
         var message = JSON.stringify(user)
         subscriber.publish('user/user', message)
