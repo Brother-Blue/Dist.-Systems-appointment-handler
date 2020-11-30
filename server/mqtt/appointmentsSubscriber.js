@@ -45,7 +45,18 @@ const insertAppointment = (data) => {
     patient: data.patient,
     dentistOffice: data.dentistOffice,
     date: data.date
-  })
+  });
+
+  db.collection('users').find({ ssn: data.patient }).toArray((err, user) => {
+    if (user) {
+      let payload = JSON.stringify({
+        date: data.date,
+        email: user.email,
+        name: user.name
+      });
+      publish('notifier', payload);
+    }
+  });
   console.log(' >> Appointment added.')
 };
 
