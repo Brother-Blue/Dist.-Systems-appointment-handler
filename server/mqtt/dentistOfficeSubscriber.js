@@ -22,7 +22,7 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 
 subscriber.on('connect', (err) => {
     subscriber.subscribe(deviceRoot + 'dentistoffice');
-    console.log(' >> Subscribed to root/dentistoffice');
+    console.log('Subscribed to root/test');
     fetch(url, settings);
 })
 
