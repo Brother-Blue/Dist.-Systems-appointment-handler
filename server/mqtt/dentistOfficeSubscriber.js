@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
 const deviceRoot = 'root/';
+const fetch = require('node-fetch');
 
 dotenv.config();
 
@@ -23,7 +24,14 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 subscriber.on('connect', (err) => {
     subscriber.subscribe(deviceRoot + 'dentistoffice');
     console.log('Subscribed to root/test');
-    fetch(url, settings);
+    
+    fetch(url, settings)
+    .then(res => res.json())
+    .then((json) => {
+        // My problem is that I do not know what to do here.. I don't understand it.
+        console.log(json);
+    });
+
 })
 
 subscriber.on('message', (topic, message) => {
