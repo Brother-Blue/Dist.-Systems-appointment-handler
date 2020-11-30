@@ -49,10 +49,11 @@ const insertAppointment = (data) => {
 
   db.collection('users').find({ ssn: data.patient }).toArray((err, user) => {
     if (user) {
+      console.log(user[0]);
       let payload = JSON.stringify({
         date: data.date,
-        email: user.email,
-        name: user.name
+        email: user[0].emailaddress,
+        name: user[0].name
       });
       publish('notifier', payload);
     }
