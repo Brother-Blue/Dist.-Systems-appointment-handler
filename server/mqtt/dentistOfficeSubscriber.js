@@ -11,6 +11,8 @@ const subscriber = mqtt.connect({
   port: process.env.MQTT_PORT
 });
 
+let url = "https://raw.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
+let settings = { method: "Get" };
 var db
 
 mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.net/Cluster0?retryWrites=true&w=majority", { useUnifiedTopology: true }, (err, client) => {
@@ -22,6 +24,7 @@ subscriber.on('connect', (err) => {
     console.log('Test Client connected!');
     subscriber.subscribe(deviceRoot + 'dentistoffice');
     console.log('Subscribed to root/test');
+    fetch(url, settings);
 })
 
 subscriber.on('message', (topic, message) => {
