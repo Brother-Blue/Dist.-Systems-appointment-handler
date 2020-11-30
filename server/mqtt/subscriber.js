@@ -13,6 +13,7 @@ const topic = 'dentist-test';
 client.on('connect', () => {
   console.log(' >> Subscriber connected...');
   client.subscribe(topic);
+  jsonParser.fetch();
 });
 
 client.on('message', (topic, message) => {
