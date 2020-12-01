@@ -97,8 +97,9 @@ const getAllDentistOffices = () => {
 }
 
 const getDentistOffice = (dentistId) => {
-    db.collection('dentistoffices').find({ id: dentistId }).toArray((err, dentistoffice) => {
+    db.collection('dentistoffices').find({ id: parseInt(dentistId) }).toArray((err, dentistoffice) => {
         if(err) console.error(err);
+        if(dentistoffice == null) console.log('Dentist office does not exist')
         const message = JSON.stringify(dentistoffice)
         publish('dentists/dentist', message)
     })
