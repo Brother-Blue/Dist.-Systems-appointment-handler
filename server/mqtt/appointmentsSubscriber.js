@@ -21,7 +21,7 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 
 client.on('connect', (err) => {
   client.subscribe(deviceRoot + 'appointments');
-  console.log(' >> Subscribed to root/appointments');
+  console.log('Subscribed to root/appointments');
 });
 
 client.on('message', (topic, message) => {

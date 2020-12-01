@@ -20,11 +20,11 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 });
 
 client.on('connect', (err) => {
-    subscriber.subscribe(deviceRoot + 'users');
+    client.subscribe(deviceRoot + 'users');
     console.log('Subscribed to root/users');
 });
 
-subscriber.on('message', (topic, message) => {
+client.on('message', (topic, message) => {
     const data = JSON.parse(message);
     const method = data.method;
 
