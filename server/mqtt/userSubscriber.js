@@ -1,4 +1,4 @@
-/*const mqtt = require('mqtt');
+const mqtt = require('mqtt');
 const dotenv = require('dotenv');
 const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
@@ -20,11 +20,11 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 });
 
 client.on('connect', (err) => {
-    subscriber.subscribe(deviceRoot + 'users');
+    client.subscribe(deviceRoot + 'users');
     console.log('Subscribed to root/users');
 });
 
-subscriber.on('message', (topic, message) => {
+client.on('message', (topic, message) => {
     const data = JSON.parse(message);
     const method = data.method;
 
@@ -65,5 +65,5 @@ const getUser = (userSsn) => {
         const message = JSON.stringify(user)
         publish('users/user', message)
     })
-};*/
+};
 
