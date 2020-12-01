@@ -101,6 +101,3 @@ const getDentistOffice = (dentistId) => {
         subscriber.publish('dentists/dentist', message)
     })
 }
-
-
-
