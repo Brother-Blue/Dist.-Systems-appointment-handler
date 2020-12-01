@@ -2,6 +2,7 @@ const mqtt = require('mqtt');
 const dotenv = require('dotenv');
 const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
+const fetch = require('node-fetch');
 const deviceRoot = 'dentistimo/';
 const { publish } = require('./publisher')
 
