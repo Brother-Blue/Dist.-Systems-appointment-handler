@@ -46,9 +46,24 @@ const appointmentMessage = JSON.stringify({
   method: "add"
 });
 
+// These are tests for the logger, just for writing.
+const loggerTopicGeneral = 'General';
+const loggerMessageGeneral = "general";
+
+const loggerTopicError = 'Error';
+const loggerMessageError = "error";
+
+const loggerTopicConfirm = 'Confirmation';
+const loggerMessageConfirm = "confirmation";
+
 client.on('connect', () => {
   console.log(' >> Publisher connected...');
   client.publish(userTopic, userMessage);
   client.publish(dentistTopic, dentistMessage);
   client.publish(appointmentTopic, appointmentMessage);
+  
+  // Here are some tests for the logger.
+  client.publish(loggerTopicGeneral, loggerMessageGeneral);
+  client.publish(loggerTopicError, loggerMessageError);
+  client.publish(loggerTopicConfirm, loggerMessageConfirm);
 });

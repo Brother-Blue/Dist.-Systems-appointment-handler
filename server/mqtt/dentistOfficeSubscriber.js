@@ -2,12 +2,15 @@ const mqtt = require('mqtt');
 const dotenv = require('dotenv');
 const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
+const fetch = require('node-fetch');
 const deviceRoot = 'dentistimo/';
 const { publish } = require('./publisher')
 
 dotenv.config();
 
 let db;
+let url = "https://raw.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
+let settings = { method: "Get" };
 
 const client = mqtt.connect({
     host: process.env.MQTT_HOST,
@@ -17,6 +20,23 @@ const client = mqtt.connect({
 mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.net/Cluster0?retryWrites=true&w=majority", { useUnifiedTopology: true }, (err, client) => {
   if (err) return console.error(err);
   db = client.db('root-test');
+
+  fetch(url, settings)
+    .then(res => res.json())
+    .then((json) => {
+        
+        var result = [];
+
+        for(var i = 0; i < json.dentists.length; i++){
+            result.push(json.dentists[i]);
+            console.log(result[i]);
+        }
+
+        for(var i in result){
+            insertDentistOffice(result[i]);
+        }
+    });
+
 });
 
 client.on('connect', (err) => {
@@ -53,8 +73,8 @@ const insertDentistOffice = (data) => {
         address: data.address,
         city: data.city,
         coordinate: [{
-            latitude: data.coordinate.latitude,
-            longitude: data.coordinate.longitude,
+            latitude: data.coordinate.latitude || data.coordinate[0],
+            longitude: data.coordinate.longitude || data.coordinate[1],
         }],
         openinghours: [{
             monday: data.openinghours.monday,
@@ -83,6 +103,3 @@ const getDentistOffice = (dentistId) => {
         publish('dentists/dentist', message)
     })
 }
-
-
-
