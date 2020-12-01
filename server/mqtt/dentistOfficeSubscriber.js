@@ -65,6 +65,7 @@ const insertDentistOffice = (data) => {
         }]
 
     })
+    console.log(' > Dentist office added.')
 }
 
 const getAllDentistOffices = () => {

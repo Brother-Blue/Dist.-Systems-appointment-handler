@@ -6,6 +6,9 @@ const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const router = require('router');
+const userSub = require('./mqtt/userSubscriber');
+const appointmentSub = require('./mqtt/appointmentsSubscriber');
+const dentistOfficeSub = require('./mqtt/dentistOfficeSubscriber');
 
 // Configure env file use
 dotenv.config();
