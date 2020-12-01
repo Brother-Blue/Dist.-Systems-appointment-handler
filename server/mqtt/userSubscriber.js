@@ -1,4 +1,4 @@
-const mqtt = require('mqtt');
+/*const mqtt = require('mqtt');
 const dotenv = require('dotenv');
 const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
@@ -65,5 +65,5 @@ const getUser = (userSsn) => {
         const message = JSON.stringify(user)
         publish('users/user', message)
     })
-};
+};*/
 
