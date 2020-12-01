@@ -19,19 +19,28 @@ var db
 mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.net/Cluster0?retryWrites=true&w=majority", { useUnifiedTopology: true }, (err, client) => {
   if (err) return console.error(err);
   db = client.db('root-test');
+
+  fetch(url, settings)
+    .then(res => res.json())
+    .then((json) => {
+        
+        var result = [];
+
+        for(var i = 0; i < json.dentists.length; i++){
+            result.push(json.dentists[i]);
+            console.log(result[i]);
+        }
+
+        for(var i in result){
+            insertDentistOffice(result[i]);
+        }
+    });
+
 });
 
 subscriber.on('connect', (err) => {
     subscriber.subscribe(deviceRoot + 'dentistoffice');
     console.log('Subscribed to root/test');
-    
-    fetch(url, settings)
-    .then(res => res.json())
-    .then((json) => {
-        // My problem is that I do not know what to do here.. I don't understand it.
-        console.log(json);
-    });
-
 })
 
 subscriber.on('message', (topic, message) => {
@@ -62,8 +71,8 @@ const insertDentistOffice = (data) => {
         address: data.address,
         city: data.city,
         coordinate: [{
-            latitude: data.coordinate.latitude,
-            longitude: data.coordinate.longitude,
+            latitude: data.coordinate.latitude || data.coordinate[0],
+            longitude: data.coordinate.longitude || data.coordinate[1],
         }],
         openinghours: [{
             monday: data.openinghours.monday,
