@@ -3,29 +3,30 @@ const dotenv = require('dotenv');
 const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
 const deviceRoot = 'root/';
+const { publish } = require('./publisher');
 
 dotenv.config();
 
-const subscriber = mqtt.connect({
+const client = mqtt.connect({
   host: process.env.MQTT_HOST,
   port: process.env.MQTT_PORT
 });
 
-var db
+let db;
 
 mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.net/Cluster0?retryWrites=true&w=majority", { useUnifiedTopology: true }, (err, client) => {
   if (err) return console.error(err);
   db = client.db('root-test');
 });
 
-subscriber.on('connect', (err) => {
-    subscriber.subscribe(deviceRoot + 'user');
-    console.log(' >> Subscribed to root/user');
-})
+client.on('connect', (err) => {
+    client.subscribe(deviceRoot + 'users');
+    console.log('Subscribed to root/users');
+});
 
-subscriber.on('message', (topic, message) => {
-    var data = JSON.parse(message)
-    var method = data.method
+client.on('message', (topic, message) => {
+    const data = JSON.parse(message);
+    const method = data.method;
 
     switch(method) {
         case 'add':
@@ -40,7 +41,7 @@ subscriber.on('message', (topic, message) => {
         default:
             return console.log('Invalid method')
     }
-})
+});
 
 const insertUser = (data) => {
     db.collection('users').insertOne({
@@ -48,22 +49,21 @@ const insertUser = (data) => {
         name: data.name,
         emailaddress: data.emailaddress
     })
-    console.log(' > User added.')
-}
+};
 
 const getAllUsers = () => {
     db.collection('users').find({}).toArray((err, user) => {
         if(err) console.error(err);
-        var message = JSON.stringify(user)
-        subscriber.publish('user', message)
+        const message = JSON.stringify(user)
+        publish('users', message)
     })
-}
+};
 
 const getUser = (userSsn) => {
     db.collection('users').find({ ssn: userSsn }).toArray((err, user) => {
         if(err) console.error(err);
-        var message = JSON.stringify(user)
-        subscriber.publish('user/user', message)
+        const message = JSON.stringify(user)
+        publish('users/user', message)
     })
-}
+};
 

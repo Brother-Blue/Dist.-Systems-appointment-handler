@@ -3,15 +3,32 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const client = mqtt.connect({
-  host: process.env.MQTT_HOST,
-  port: process.env.MQTT_PORT
-});
+let client;
 
-const topic = 'dentist-test';
-const message = 'You have subscribed to Dentist Daily!';
+connect = async () => {
+    client = mqtt.connect({
+        host: process.env.MQTT_HOST,
+        port: process.env.MQTT_PORT
+    });
+    
+    client.on('connect', (err) => {
+        if (err.errorCode === -1) return console.error(err);
+    });
+};
 
-client.on('connect', () => {
-  console.log(' >> Publisher connected...');
-  client.publish(topic, message);
-});
+const publish = async (topic, message, qos = 0) => {
+    if (client) {
+        try {
+            await client.publish('dentistimo/' + topic, message, qos);
+             // client.publish('dentistimo/logger', `Published message: ${message}`, 1);
+            } catch (err) {
+                console.error(err); // temporary
+                // client.publish('dentistimo/logger', `ERROR: ${error}`, 2);
+            }
+        } else {
+            await connect(); // If no publisher client exists, wait until connected then call publish again.
+            publish(topic, message);
+        }
+};
+
+module.exports.publish = publish;

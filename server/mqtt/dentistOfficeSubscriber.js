@@ -2,19 +2,19 @@ const mqtt = require('mqtt');
 const dotenv = require('dotenv');
 const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
-const deviceRoot = 'root/';
-const fetch = require('node-fetch');
+const deviceRoot = 'dentistimo/';
+const { publish } = require('./publisher')
 
 dotenv.config();
 
-const subscriber = mqtt.connect({
-  host: process.env.MQTT_HOST,
-  port: process.env.MQTT_PORT
-});
-
+let db;
 let url = "https://raw.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
 let settings = { method: "Get" };
-var db
+
+const client = mqtt.connect({
+    host: process.env.MQTT_HOST,
+    port: process.env.MQTT_PORT
+  });
 
 mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.net/Cluster0?retryWrites=true&w=majority", { useUnifiedTopology: true }, (err, client) => {
   if (err) return console.error(err);
@@ -38,14 +38,15 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 
 });
 
-subscriber.on('connect', (err) => {
-    subscriber.subscribe(deviceRoot + 'dentistoffice');
+client.on('connect', (err) => {
+    console.log('Test Client connected!');
+    client.subscribe(deviceRoot + 'dentistoffice');
     console.log('Subscribed to root/test');
 })
 
-subscriber.on('message', (topic, message) => {
-    var data = JSON.parse(message)
-    var method = data.method
+client.on('message', (topic, message) => {
+    let data = JSON.parse(message)
+    const method = data.method
 
     switch(method) {
         case 'add':
@@ -89,15 +90,15 @@ const insertDentistOffice = (data) => {
 const getAllDentistOffices = () => {
     db.collection('dentistoffices').find({}).toArray((err, dentistoffices) => {
         if(err) console.error(err);
-        var message = JSON.stringify(dentistoffices)
-        subscriber.publish('dentists', message)
+        const message = JSON.stringify(dentistoffices)
+        publish('dentists', message)
     })
 }
 
 const getDentistOffice = (dentistId) => {
     db.collection('dentistoffices').find({ id: dentistId }).toArray((err, dentistoffice) => {
         if(err) console.error(err);
-        var message = JSON.stringify(dentistoffice)
-        subscriber.publish('dentists/dentist', message)
+        const message = JSON.stringify(dentistoffice)
+        publish('dentists/dentist', message)
     })
 }
