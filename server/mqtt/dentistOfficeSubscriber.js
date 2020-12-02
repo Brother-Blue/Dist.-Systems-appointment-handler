@@ -72,17 +72,17 @@ const insertDentistOffice = (data) => {
         dentists: data.dentists,
         address: data.address,
         city: data.city,
-        coordinate: [{
-            latitude: data.coordinate.latitude || data.coordinate[0],
-            longitude: data.coordinate.longitude || data.coordinate[1],
-        }],
-        openinghours: [{
+        coordinate: {
+            latitude: data.coordinate.latitude,
+            longitude: data.coordinate.longitude,
+        },
+        openinghours: {
             monday: data.openinghours.monday,
             tuesday: data.openinghours.tuesday,
             wednesday: data.openinghours.wednesday,
             thursday: data.openinghours.thursday,
             friday: data.openinghours.friday,
-        }]
+        }
 
     })
     console.log(' > Dentist office added.')
