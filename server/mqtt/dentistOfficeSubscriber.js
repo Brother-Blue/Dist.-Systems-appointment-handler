@@ -20,23 +20,6 @@ const client = mqtt.connect({
 mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.net/Cluster0?retryWrites=true&w=majority", { useUnifiedTopology: true }, (err, client) => {
   if (err) return console.error(err);
   db = client.db('root-test');
-
-  fetch(url, settings)
-    .then(res => res.json())
-    .then((json) => {
-        
-        var result = [];
-
-        for(var i = 0; i < json.dentists.length; i++){
-            result.push(json.dentists[i]);
-            console.log(result[i]);
-        }
-
-        for(var i in result){
-            insertDentistOffice(result[i]);
-        }
-    });
-
 });
 
 client.on('connect', (err) => {
@@ -50,10 +33,8 @@ client.on('message', (topic, message) => {
     const method = data.method
 
     switch(method) {
-        case 'add':
-            insertDentistOffice(data);
-            break;
         case 'getAll':
+            updateDentistOffices();
             getAllDentistOffices(data);
             break;
         case 'getOne': 
@@ -64,28 +45,43 @@ client.on('message', (topic, message) => {
     }
 })
 
-const insertDentistOffice = (data) => {
-    db.collection('dentistoffices').insertOne({
-        id: data.id,
-        name: data.name,
-        owner: data.owner,
-        dentists: data.dentists,
-        address: data.address,
-        city: data.city,
-        coordinate: {
-            latitude: data.coordinate.latitude,
-            longitude: data.coordinate.longitude,
-        },
-        openinghours: {
-            monday: data.openinghours.monday,
-            tuesday: data.openinghours.tuesday,
-            wednesday: data.openinghours.wednesday,
-            thursday: data.openinghours.thursday,
-            friday: data.openinghours.friday,
+const updateDentistOffices = (data) => {
+    fetch(url, settings)
+    .then(res => res.json())
+    .then((json) => {
+        
+        var result = [];
+
+        for(var i = 0; i < json.dentists.length; i++){
+            result.push(json.dentists[i]);
         }
 
-    })
-    console.log(' > Dentist office added.')
+        for(var i in result){
+            db.collection('dentistoffices').updateOne(
+                { "id": result[i].id },
+                { $set: {
+                    "id": result[i].id,
+                    "name": result[i].name,
+                    "owner": result[i].owner,
+                    "dentists": result[i].dentists,
+                    "address": result[i].address,
+                    "city": result[i].city,
+                    "coordinate": {
+                        "longitude": result[i].coordinate.longitude,
+                        "latitude": result[i].coordinate.latitude
+                    },
+                    "openinghours": {
+                        "monday": result[i].openinghours.monday,
+                        "tuesday": result[i].openinghours.tuesday,
+                        "wednesday": result[i].openinghours.wednesday,
+                        "thursday": result[i].openinghours.thursday,
+                        "friday": result[i].openinghours.friday
+                    }
+                }},
+                {upsert: true})
+        }
+    });
+    console.log(' > Dentist office collecton updated.')
 }
 
 const getAllDentistOffices = () => {
