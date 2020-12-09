@@ -21,7 +21,7 @@ const publish = async (topic, message, qos = 0) => {
             client.publish('dentistimo/log/general', `Published message: ${message}. Event ID: ${eventID}`, 1);
 
         } catch (err) {
-            client.publish('dentistimo/log/error', `ERROR: ${error}. Event ID: ${eventID}`, 1);
+            client.publish('dentistimo/log/error', `ERROR: ${err}. Event ID: ${eventID}`, 1);
         }
         eventID++;
     } else {
