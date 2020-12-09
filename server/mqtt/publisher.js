@@ -1,6 +1,8 @@
 const mqtt = require('mqtt');
 const dotenv = require('dotenv');
 
+let eventID = 0;
+
 dotenv.config();
 
 let client;
@@ -20,15 +22,16 @@ const publish = async (topic, message, qos = 0) => {
     if (client) {
         try {
             await client.publish('dentistimo/' + topic, message, qos);
-             // client.publish('dentistimo/logger', `Published message: ${message}`, 1);
-            } catch (err) {
-                console.error(err); // temporary
-                // client.publish('dentistimo/logger', `ERROR: ${error}`, 2);
-            }
-        } else {
-            await connect(); // If no publisher client exists, wait until connected then call publish again.
-            publish(topic, message);
+            client.publish('dentistimo/log/general', `Published message: ${message}. Event ID: ${eventID}`, 1);
+
+        } catch (err) {
+            client.publish('dentistimo/log/error', `ERROR: ${error}. Event ID: ${eventID}`, 1);
         }
+        eventID++;
+    } else {
+        await connect(); // If no publisher client exists, wait until connected then call publish again.
+        publish(topic, message);
+    }
 };
 
 module.exports.publish = publish;
