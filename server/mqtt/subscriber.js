@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
+let client;
+
 connect = async () => {
   client = mqtt.connect({
       host: process.env.MQTT_HOST,
