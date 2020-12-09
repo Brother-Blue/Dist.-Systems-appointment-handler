@@ -21,7 +21,6 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 
 client.on('connect', (err) => {
   client.subscribe(deviceRoot + 'appointments');
-  console.log('Subscribed to root/appointments');
 });
 
 client.on('message', (topic, message) => {
@@ -43,20 +42,21 @@ client.on('message', (topic, message) => {
 const insertAppointment = (data) => {
   db.collection('appointments').insertOne({
     patient: data.patient,
+    name: data.name,
+    emailaddress: data.emailaddress,
     dentistOffice: data.dentistOffice,
     date: data.date
   });
-
-  db.collection('users').find({ ssn: data.patient }).toArray((err, user) => {
-    if (user) {
       let payload = JSON.stringify({
         date: data.date,
-        email: user[0].emailaddress,
-        name: user[0].name
+        emailaddress: data.emailaddress,
+        name: data.name
       });
+      console.log(payload);
       publish('notifier', payload);
-    }
-  });
+      publish('log/general', payload);
+    
+  
   console.log(' >> Appointment added.')
 };
 

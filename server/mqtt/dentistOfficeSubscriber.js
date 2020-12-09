@@ -20,12 +20,13 @@ const client = mqtt.connect({
 mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.net/Cluster0?retryWrites=true&w=majority", { useUnifiedTopology: true }, (err, client) => {
   if (err) return console.error(err);
   db = client.db('root-test');
+  updateDentistOffices();
 });
 
 client.on('connect', (err) => {
     console.log('Test Client connected!');
     client.subscribe(deviceRoot + 'dentistoffice');
-    console.log('Subscribed to root/test');
+    console.log('Subscribed');
 })
 
 client.on('message', (topic, message) => {
@@ -34,7 +35,6 @@ client.on('message', (topic, message) => {
 
     switch(method) {
         case 'getAll':
-            updateDentistOffices();
             getAllDentistOffices(data);
             break;
         case 'getOne': 
@@ -46,42 +46,51 @@ client.on('message', (topic, message) => {
 })
 
 const updateDentistOffices = (data) => {
-    fetch(url, settings)
-    .then(res => res.json())
-    .then((json) => {
-        
-        var result = [];
+    try{
+        fetch(url, settings)
+        .then(res => res.json())
+        .then((json) => {
+            
+            var result = [];
+    
+            for(var i = 0; i < json.dentists.length; i++){
+                result.push(json.dentists[i]);
+            }
+    
+            for(var i in result){
+                db.collection('dentistoffices').updateOne(
+                    { "id": result[i].id },
+                    { $set: {
+                        "id": result[i].id,
+                        "name": result[i].name,
+                        "owner": result[i].owner,
+                        "dentists": result[i].dentists,
+                        "address": result[i].address,
+                        "city": result[i].city,
+                        "coordinate": {
+                            "longitude": result[i].coordinate.longitude,
+                            "latitude": result[i].coordinate.latitude
+                        },
+                        "openinghours": {
+                            "monday": result[i].openinghours.monday,
+                            "tuesday": result[i].openinghours.tuesday,
+                            "wednesday": result[i].openinghours.wednesday,
+                            "thursday": result[i].openinghours.thursday,
+                            "friday": result[i].openinghours.friday
+                        }
+                    }},
+                    {upsert: true})
+            }
+        });
+        console.log(' > Dentist office collecton updated.')
 
-        for(var i = 0; i < json.dentists.length; i++){
-            result.push(json.dentists[i]);
-        }
 
-        for(var i in result){
-            db.collection('dentistoffices').updateOne(
-                { "id": result[i].id },
-                { $set: {
-                    "id": result[i].id,
-                    "name": result[i].name,
-                    "owner": result[i].owner,
-                    "dentists": result[i].dentists,
-                    "address": result[i].address,
-                    "city": result[i].city,
-                    "coordinate": {
-                        "longitude": result[i].coordinate.longitude,
-                        "latitude": result[i].coordinate.latitude
-                    },
-                    "openinghours": {
-                        "monday": result[i].openinghours.monday,
-                        "tuesday": result[i].openinghours.tuesday,
-                        "wednesday": result[i].openinghours.wednesday,
-                        "thursday": result[i].openinghours.thursday,
-                        "friday": result[i].openinghours.friday
-                    }
-                }},
-                {upsert: true})
-        }
-    });
-    console.log(' > Dentist office collecton updated.')
+    } catch(e) {
+         client.publish(deviceRoot+'log/error', e);
+         console.log(e);
+    }
+    
+    setTimeout(updateDentistOffices, 600000);
 }
 
 const getAllDentistOffices = () => {
