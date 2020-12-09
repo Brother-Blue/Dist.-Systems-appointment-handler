@@ -3,8 +3,8 @@ const dotenv = require('dotenv');
 const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
 const fetch = require('node-fetch');
-const deviceRoot = 'dentistimo/';
 const { publish } = require('./publisher')
+const { subscribe } = require('./subscriber'); // { subscribe, unsubscribe } for future use
 
 dotenv.config();
 
@@ -24,9 +24,8 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 });
 
 client.on('connect', (err) => {
-    console.log('Test Client connected!');
-    client.subscribe(deviceRoot + 'dentistoffice');
-    console.log('Subscribed');
+    subscribe('dentistoffice');
+    console.log('Subscribed to dentistimo/dentistoffice');
 })
 
 client.on('message', (topic, message) => {
@@ -86,7 +85,7 @@ const updateDentistOffices = (data) => {
 
 
     } catch(e) {
-         client.publish(deviceRoot+'log/error', e);
+         publish('log/error', e);
          console.log(e);
     }
     
