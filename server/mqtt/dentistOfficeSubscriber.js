@@ -20,6 +20,7 @@ const client = mqtt.connect({
 mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.net/Cluster0?retryWrites=true&w=majority", { useUnifiedTopology: true }, (err, client) => {
   if (err) return console.error(err);
   db = client.db('root-test');
+  getAllTimeslots();
   updateDentistOffices();
 });
 
@@ -113,9 +114,13 @@ const getDentistOffice = (dentistId) => {
     
 }
 const getAllTimeslots = () => {
+    let officeArray = []
     db.collection('dentistoffices').find({}).toArray((err, dentistoffices) => {
         if(err) console.error(err);
-        const officeArray = JSON.stringify(dentistoffices)
+        officeArray = JSON.stringify(dentistoffices)
+        publish('dentists/offices/timeslots', officesArray,1)
+    })
+    console.log(officeArray)
         let officesArray = []
         let office = {
             id:"",
@@ -132,8 +137,6 @@ const getAllTimeslots = () => {
             office.timeslots.push(getTimeSlots(officeArray[i].openinghours.friday))
             officesArray.push(office)
         }
-        publish('dentists/offices/timeslots', officesArray,1)
-    })
 }
 const getTimeSlots = (dailyhours) =>{
     var res= dailyhours.split("-"); 
