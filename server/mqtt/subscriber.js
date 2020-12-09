@@ -5,18 +5,20 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 let client = mqtt.connect({
-      host: process.env.MQTT_HOST,
-      port: process.env.MQTT_PORT
-  });
+  host: process.env.MQTT_HOST,
+  port: process.env.MQTT_PORT
+});
   
 client.on('connect', (err) => {
-    if (err.errorCode === -1) return console.error(err);
+  console.log('Subscriber online...');
+  if (err.errorCode === -1) return console.error(err);
 });
 
 const subscribe = (topic) => {
   if (client) {
     try {
       client.subscribe('dentistimo/' + topic);
+      console.log('Subscribed to: ' + topic);
       // publish(/logger, `Subscribed to topic: ${topic}`)
     } catch (err) {
       console.error(err);
