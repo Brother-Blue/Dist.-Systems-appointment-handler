@@ -41,14 +41,14 @@ client.on('message', (topic, message) => {
 
 const insertAppointment = (data) => {
   db.collection('appointments').insertOne({
-    patient: data.patient,
-    name: data.name,
-    emailaddress: data.emailaddress,
-    dentistOffice: data.dentistOffice,
-    date: data.date
+    userid: data.userid,
+    requestid: data.requestid,
+    dentistid: data.dentistid,
+    issuance: data.issuance,
+    time: data.time
   });
       let payload = JSON.stringify({
-        date: data.date,
+        date: data.time,
         emailaddress: data.emailaddress,
         name: data.name
       });
