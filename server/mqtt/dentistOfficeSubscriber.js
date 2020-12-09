@@ -39,6 +39,9 @@ client.on('message', (topic, message) => {
         case 'getOne': 
             getDentistOffice(data.id);
             break;
+        case 'getAllTimeslots':
+            getAllTimeslots();
+            break;
         default:
             return console.log('Invalid method')
     }
@@ -107,4 +110,50 @@ const getDentistOffice = (dentistId) => {
         const message = JSON.stringify(dentistoffice)
         publish('dentists/dentist', message)
     })
+    
+}
+const getAllTimeslots = () => {
+    db.collection('dentistoffices').find({}).toArray((err, dentistoffices) => {
+        if(err) console.error(err);
+        const officeArray = JSON.stringify(dentistoffices)
+        let officesArray = []
+        let office = {
+            id:"",
+            name: "",
+            timeslots: []
+        }
+        for(let i = 0; i < officeArray.length; i++){
+            office.id = officeArray[i].id
+            office.name = officeArray[i].name
+            office.timeslots.push(getTimeSlots(officeArray[i].openinghours.monday))
+            office.timeslots.push(getTimeSlots(officeArray[i].openinghours.tuesday))
+            office.timeslots.push(getTimeSlots(officeArray[i].openinghours.wednesday))
+            office.timeslots.push(getTimeSlots(officeArray[i].openinghours.thursday))
+            office.timeslots.push(getTimeSlots(officeArray[i].openinghours.friday))
+            officesArray.push(office)
+        }
+        publish('dentists/offices/timeslots', officesArray,1)
+    })
+}
+const getTimeSlots = (dailyhours) =>{
+    var res= dailyhours.split("-"); 
+    let openingHour = res[0].split(":");
+    let closingHour = res[1].split(":");
+    var timeslots = [];
+    var i;
+
+    var finalopeningHour = openingHour[0];
+    var finalclosingHour = closingHour[0];
+
+    for(i = parseInt(finalopeningHour); i < parseInt(finalclosingHour); i++) {
+      var timeslotStart = i + ":00"
+      var timeslotEnda = i + ":30"
+      timeslots.push(timeslotStart + "-" + timeslotEnda)
+      timeslotStart = i + ":30"
+      timeslotEnda = i+1 + ":00"
+      timeslots.push(timeslotStart + "-" + timeslotEnda)
+    }
+    console.log(timeslots)
+    console.log('timeslots innan return:' + timeslots)
+    return timeslots;
 }
