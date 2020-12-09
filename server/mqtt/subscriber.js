@@ -35,7 +35,7 @@ const subscribe = async (topic) => {
 const unsubscribe = async (topic) => {
   if (client) {
     try {
-      await client.unsubscribe('dentistimo/' + topic);
+      client.unsubscribe('dentistimo/' + topic);
       // publish(/logger, `Unsubscribed to topic: ${topic}`)
     } catch (err) {
       console.error(err);
