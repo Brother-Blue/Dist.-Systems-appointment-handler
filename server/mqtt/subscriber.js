@@ -13,7 +13,7 @@ client.on('connect', (err) => {
     if (err.errorCode === -1) return console.error(err);
 });
 
-const subscribe = async (topic) => {
+const subscribe = (topic) => {
   if (client) {
     try {
       client.subscribe('dentistimo/' + topic);
@@ -27,7 +27,7 @@ const subscribe = async (topic) => {
   }
 }
 
-const unsubscribe = async (topic) => {
+const unsubscribe = (topic) => {
   if (client) {
     try {
       client.unsubscribe('dentistimo/' + topic);
@@ -37,7 +37,6 @@ const unsubscribe = async (topic) => {
       // publish(/logger, `ERROR: ${err}`, 1)
     }
   } else {
-    await connect();
     unsubscribe(topic);
   }
 }
