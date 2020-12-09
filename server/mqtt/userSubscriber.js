@@ -2,7 +2,7 @@ const mqtt = require('mqtt');
 const dotenv = require('dotenv');
 const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
-const deviceRoot = 'root/';
+const deviceRoot = 'dentistimo/';
 const { publish } = require('./publisher');
 
 dotenv.config();
@@ -21,7 +21,7 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 
 client.on('connect', (err) => {
     client.subscribe(deviceRoot + 'users');
-    console.log('Subscribed to root/users');
+    console.log('Subscribed to dentistimo/users');
 });
 
 client.on('message', (topic, message) => {
