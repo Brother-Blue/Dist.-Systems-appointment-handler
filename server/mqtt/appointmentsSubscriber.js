@@ -36,6 +36,8 @@ client.on('message', (topic, message) => {
     case 'getOne':
       getAppointment(data._id);
       break;
+    default:
+      return console.log('Invalid method')
   }
 });
 
