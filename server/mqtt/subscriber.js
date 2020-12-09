@@ -4,18 +4,14 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-let client;
-
-connect = async () => {
-  client = mqtt.connect({
+let client = mqtt.connect({
       host: process.env.MQTT_HOST,
       port: process.env.MQTT_PORT
   });
   
-  client.on('connect', (err) => {
-      if (err.errorCode === -1) return console.error(err);
-  });
-};
+client.on('connect', (err) => {
+    if (err.errorCode === -1) return console.error(err);
+});
 
 const subscribe = async (topic) => {
   if (client) {
@@ -27,7 +23,6 @@ const subscribe = async (topic) => {
       // publish(/logger, `ERROR: ${err}`, 1)
     }
   } else {
-    await connect();
     subscribe(topic);
   }
 }
