@@ -117,28 +117,38 @@ const getAllTimeslots = () => {
     let officeArray = []
     db.collection('dentistoffices').find({}).toArray((err, dentistoffices) => {
         if(err) console.error(err);
-        officeArray = JSON.stringify(dentistoffices)
-        publish('dentists/offices/timeslots', officesArray,1)
+        officeArray = dentistoffices
     })
-    console.log(officeArray)
+    setTimeout(() => {
+        console.log(officeArray.length)
         let officesArray = []
-        let office = {
-            id:"",
-            name: "",
-            timeslots: []
-        }
         for(let i = 0; i < officeArray.length; i++){
+            let office = {
+                id:"",
+                name: "",
+                timeslots: {
+                    monday: [],
+                    tuesday: [],
+                    wednesday: [],
+                    thursday: [],
+                    friday: []
+                }
+            }
+            console.log(officeArray[i].id + "this is the id -------- reeeeeeeeeeeee")
             office.id = officeArray[i].id
             office.name = officeArray[i].name
-            office.timeslots.push(getTimeSlots(officeArray[i].openinghours.monday))
-            office.timeslots.push(getTimeSlots(officeArray[i].openinghours.tuesday))
-            office.timeslots.push(getTimeSlots(officeArray[i].openinghours.wednesday))
-            office.timeslots.push(getTimeSlots(officeArray[i].openinghours.thursday))
-            office.timeslots.push(getTimeSlots(officeArray[i].openinghours.friday))
+            office.timeslots.monday = (getTimeSlots(officeArray[i].openinghours.monday))
+            office.timeslots.tuesday = (getTimeSlots(officeArray[i].openinghours.tuesday))
+            office.timeslots.wednesday = (getTimeSlots(officeArray[i].openinghours.wednesday))
+            office.timeslots.thursday = (getTimeSlots(officeArray[i].openinghours.thursday))
+            office.timeslots.friday = (getTimeSlots(officeArray[i].openinghours.friday))
             officesArray.push(office)
         }
+        console.log(officesArray)
+        publish('dentists/offices/timeslots', officesArray,1)
+     }, 1000);
 }
-const getTimeSlots = (dailyhours) =>{
+ getTimeSlots = function (dailyhours) {
     var res= dailyhours.split("-"); 
     let openingHour = res[0].split(":");
     let closingHour = res[1].split(":");
@@ -156,7 +166,5 @@ const getTimeSlots = (dailyhours) =>{
       timeslotEnda = i+1 + ":00"
       timeslots.push(timeslotStart + "-" + timeslotEnda)
     }
-    console.log(timeslots)
-    console.log('timeslots innan return:' + timeslots)
     return timeslots;
 }
