@@ -21,7 +21,7 @@ connect = async () => {
 const publish = async (topic, message, qos = 0) => {
     if (client) {
         try {
-            await client.publish('dentistimo/' + topic, message, qos);
+            client.publish('dentistimo/' + topic, message, qos);
             client.publish('dentistimo/log/general', `Published message: ${message}. Event ID: ${eventID}`, 1);
 
         } catch (err) {

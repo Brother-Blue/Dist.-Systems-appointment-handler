@@ -20,7 +20,7 @@ connect = async () => {
 const subscribe = async (topic) => {
   if (client) {
     try {
-      await client.subscribe('dentistimo/' + topic);
+      client.subscribe('dentistimo/' + topic);
       // publish(/logger, `Subscribed to topic: ${topic}`)
     } catch (err) {
       console.error(err);
