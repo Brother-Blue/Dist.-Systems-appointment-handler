@@ -57,7 +57,7 @@ const insertAppointment = (data) => {
     time: data.time,
   });
 
-  console.log(data.userid + data.requestid + data.dentistid + data.issuance + data.time);
+  console.log(data.userid + " " + data.requestid + " " + data.dentistid + data.issuance + data.time);
 
   let payload = JSON.stringify({
     date: data.time,
