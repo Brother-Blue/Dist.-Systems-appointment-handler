@@ -46,6 +46,9 @@ client.on("message", (topic, message) => {
 });
 
 const insertAppointment = (data) => {
+
+  console.log(data);
+
   db.collection("appointments").insertOne({
     userid: data.userid,
     requestid: data.requestid,
@@ -53,6 +56,9 @@ const insertAppointment = (data) => {
     issuance: data.issuance,
     time: data.time,
   });
+
+  console.log(data.userid + data.requestid + data.dentistid + data.issuance + data.time);
+
   let payload = JSON.stringify({
     date: data.time,
     emailaddress: data.emailaddress,
