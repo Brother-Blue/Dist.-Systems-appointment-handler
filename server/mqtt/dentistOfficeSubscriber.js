@@ -161,6 +161,7 @@ const getAllTimeslots = () => {
         officeArray[i].openinghours.friday
       );
       officesArray.push(office);
+      console.log(office)
     }
     publish("dentists/offices/timeslots", JSON.stringify(officesArray), 1);
   }, 1000);
@@ -181,11 +182,10 @@ getTimeSlots = function (dailyhours) {
         var timeslotStart = i + ":00";
         var timeslotEnda = i + ":30";
         timeslots.push(timeslotStart + "-" + timeslotEnda);
-      } else {
+      }
         timeslotStart = i + ":30";
         timeslotEnda = i + 1 + ":00";
         timeslots.push(timeslotStart + "-" + timeslotEnda);
-      }
     }
   }
   return timeslots;
