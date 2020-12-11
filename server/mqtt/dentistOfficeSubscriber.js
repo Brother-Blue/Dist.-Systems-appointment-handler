@@ -92,7 +92,7 @@ const updateDentistOffices = (data) => {
           );
         }
       });
-    console.log(" > Dentist office collecton updated.");
+    console.log(" >> Dentist office collection updated.");
   } catch (e) {
     publish("log/error", e);
     console.log(e);
@@ -161,7 +161,6 @@ const getAllTimeslots = () => {
         officeArray[i].openinghours.friday
       );
       officesArray.push(office);
-      console.log(office);
     }
     publish("dentists/offices/timeslots", JSON.stringify(officesArray), 1);
   }, 1000);
