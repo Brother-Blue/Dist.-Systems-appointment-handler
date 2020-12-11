@@ -141,8 +141,8 @@ const getAllTimeslots = () => {
             office.timeslots.friday = (getTimeSlots(officeArray[i].openinghours.friday))
             officesArray.push(office)
         }
+        publish('dentists/offices/timeslots', JSON.stringify(officesArray),1)
      }, 1000);
-     publish('dentists/offices/timeslots', JSON.stringify(officesArray),1)
 }
  getTimeSlots = function (dailyhours) {
     var res= dailyhours.split("-"); 
