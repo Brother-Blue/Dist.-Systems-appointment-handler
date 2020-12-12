@@ -14,6 +14,7 @@ const options = {
     errorHandlingPercentage: 50, //If 50% of requests fail, trigger circuit
     resetTimeout: 3000 //After xx seconds try again
 }
+
 let db;
 let url = "https://raw.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
 let settings = { method: "Get" };
@@ -29,9 +30,9 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
   const breaker = new CircuitBreaker(updateDentistOffices, options)
   setInterval(() => {
       breaker.fire()
-    .then(console.log)
-    .catch(console.error)
-    }, 3000);
+    .then()
+    .catch()
+    }, 600000);
 })
 
 client.on('connect', (err) => {
@@ -42,23 +43,33 @@ client.on('connect', (err) => {
 client.on('message', (topic, message) => {
     let data = JSON.parse(message)
     const method = data.method
+    let breaker;
 
     switch(method) {
         case 'getAll':
-            getAllDentistOffices(data);
+            breaker = new CircuitBreaker(getAllDentistOffices(), options)
+            breaker.fire()
+            .then(console.log)
+            .catch(console.error)
             break;
         case 'getOne': 
-            getDentistOffice(data.id);
+            breaker = new CircuitBreaker(getDentistOffice(data.id), options)
+            breaker.fire()
+            .then(console.log)
+            .catch(console.error)
             break;
         case 'getAllTimeslots':
-            getAllTimeslots();
+            breaker = new CircuitBreaker(getAllTimeslots, options)
+            breaker.fire()
+            .then(console.log)
+            .catch(console.error)
             break;
         default:
             return console.log('Invalid method')
     }
 })
 
-const updateDentistOffices = (data) => {
+const updateDentistOffices = () => {
     return new Promise((resolve, reject) => {
 
             fetch(url, settings)
@@ -107,53 +118,75 @@ const updateDentistOffices = (data) => {
 }
 
 const getAllDentistOffices = () => {
-    db.collection('dentistoffices').find({}).toArray((err, dentistoffices) => {
-        if(err) console.error(err);
-        const message = JSON.stringify(dentistoffices)
-        publish('dentists', message)
+    return new Promise((resolve, reject) => {
+        db.collection('dentistoffices').find({}).toArray()
+        .then((result) => {
+            const message = JSON.stringify(result)
+            publish('dentists', message)
+            resolve({data: "Success"})
+        })
+        .catch((err) => {
+            console.log(err)
+            reject({data: "Failure"})
+        })
     })
 }
 
 const getDentistOffice = (dentistId) => {
-    db.collection('dentistoffices').find({ id: parseInt(dentistId) }).toArray((err, dentistoffice) => {
-        if(err) console.error(err);
-        if(dentistoffice == null) console.log('Dentist office does not exist')
-        const message = JSON.stringify(dentistoffice)
-        publish('dentists/dentist', message)
+    return new Promise ((resolve, reject) => {
+        db.collection('dentistoffices').find({ id: parseInt(dentistId) }).toArray()
+        .then((result) => {
+            var dentistoffice = result
+            if(dentistoffice == null) console.log('Dentist office does not exist')
+            const message = JSON.stringify(dentistoffice)
+            publish('dentists/dentist', message)
+            resolve({data: "Success"})
+        })
+        .catch((err) => {
+            console.error(err);  
+            reject({data: "Failure"})
+        })
     })
-    
 }
+
 const getAllTimeslots = () => {
-    let officeArray = []
-    db.collection('dentistoffices').find({}).toArray((err, dentistoffices) => {
-        if(err) console.error(err);
-        officeArray = dentistoffices
-    })
-    setTimeout(() => {
-        let officesArray = []
-        for(let i = 0; i < officeArray.length; i++){
-            let office = {
-                id:"",
-                name: "",
-                timeslots: {
-                    monday: [],
-                    tuesday: [],
-                    wednesday: [],
-                    thursday: [],
-                    friday: []
+    return new Promise ((resolve, reject) => {
+        let officeArray = []
+        db.collection('dentistoffices').find({}).toArray()
+        .then((result) => {
+                officeArray = result
+                let officesArray = []
+                for(let i = 0; i < officeArray.length; i++){
+                    let office = {
+                        id:"",
+                        name: "",
+                        timeslots: {
+                            monday: [],
+                            tuesday: [],
+                            wednesday: [],
+                            thursday: [],
+                            friday: []
+                        }
+                    }
+                    office.id = officeArray[i].id
+                    office.name = officeArray[i].name
+                    office.timeslots.monday = (getTimeSlots(officeArray[i].openinghours.monday))
+                    office.timeslots.tuesday = (getTimeSlots(officeArray[i].openinghours.tuesday))
+                    office.timeslots.wednesday = (getTimeSlots(officeArray[i].openinghours.wednesday))
+                    office.timeslots.thursday = (getTimeSlots(officeArray[i].openinghours.thursday))
+                    office.timeslots.friday = (getTimeSlots(officeArray[i].openinghours.friday))
+                    officesArray.push(office)
                 }
-            }
-            office.id = officeArray[i].id
-            office.name = officeArray[i].name
-            office.timeslots.monday = (getTimeSlots(officeArray[i].openinghours.monday))
-            office.timeslots.tuesday = (getTimeSlots(officeArray[i].openinghours.tuesday))
-            office.timeslots.wednesday = (getTimeSlots(officeArray[i].openinghours.wednesday))
-            office.timeslots.thursday = (getTimeSlots(officeArray[i].openinghours.thursday))
-            office.timeslots.friday = (getTimeSlots(officeArray[i].openinghours.friday))
-            officesArray.push(office)
-        }
-        publish('dentists/offices/timeslots', JSON.stringify(officesArray),1)
-     }, 1000);
+                publish('dentists/offices/timeslots', JSON.stringify(officesArray),1)
+                resolve({data: "Success"})
+             
+        }).catch((err) => {
+            console.log(err)
+            reject({data: "Failure"})
+        })
+
+    })
+
 }
  getTimeSlots = function (dailyhours) {
     var res= dailyhours.split("-"); 
