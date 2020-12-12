@@ -15,7 +15,7 @@ const options = {
     resetTimeout: 3000 //After xx seconds try again
 }
 let db;
-let url = "https://ra.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
+let url = "https://raw.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
 let settings = { method: "Get" };
 
 const client = mqtt.connect({
