@@ -1,6 +1,6 @@
-const mqtt = require('mqtt');
-const dotenv = require('dotenv');
-const mongodb = require('mongodb');
+const mqtt = require("mqtt");
+const dotenv = require("dotenv");
+const mongodb = require("mongodb");
 const mongoClient = mongodb.MongoClient;
 const fetch = require('node-fetch');
 const { publish } = require('./publisher')
@@ -16,7 +16,8 @@ const options = {
 }
 
 let db;
-let url = "https://raw.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
+let url =
+  "https://raw.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
 let settings = { method: "Get" };
 
 const client = mqtt.connect({
@@ -195,16 +196,20 @@ const getAllTimeslots = () => {
     var timeslots = [];
     var i;
 
-    var finalopeningHour = openingHour[0];
-    var finalclosingHour = closingHour[0];
+  var finalopeningHour = openingHour[0];
+  var finalclosingHour = closingHour[0];
 
-    for(i = parseInt(finalopeningHour); i < parseInt(finalclosingHour); i++) {
-      var timeslotStart = i + ":00"
-      var timeslotEnda = i + ":30"
-      timeslots.push(timeslotStart + "-" + timeslotEnda)
-      timeslotStart = i + ":30"
-      timeslotEnda = i+1 + ":00"
-      timeslots.push(timeslotStart + "-" + timeslotEnda)
+  for (i = parseInt(finalopeningHour); i < parseInt(finalclosingHour); i++) {
+    if (i != 12) {
+      if (i != 14) {
+        var timeslotStart = i + ":00";
+        var timeslotEnda = i + ":30";
+        timeslots.push(timeslotStart + "-" + timeslotEnda);
+      }
+        timeslotStart = i + ":30";
+        timeslotEnda = i + 1 + ":00";
+        timeslots.push(timeslotStart + "-" + timeslotEnda);
     }
-    return timeslots;
-}
+  }
+  return timeslots;
+};
