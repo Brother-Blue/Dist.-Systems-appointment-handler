@@ -4,7 +4,7 @@ const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
 const fetch = require('node-fetch');
 const { publish } = require('./publisher')
-const deviceRoot = 'dentistimo/';
+const root = 'dentistimo/';
 const CircuitBreaker = require('opossum')
 
 dotenv.config();
@@ -36,7 +36,7 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 })
 
 client.on('connect', (err) => {
-    client.subscribe(deviceRoot + 'dentistoffice');
+    client.subscribe(root + 'dentistoffice');
     console.log('Subscribed to dentistimo/dentistoffice');
 })
 

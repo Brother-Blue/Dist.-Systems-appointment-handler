@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const mongodb = require('mongodb');
 const mongoClient = mongodb.MongoClient;
 const { publish } = require('./publisher');
-const deviceRoot = 'dentistimo/';
+const root = 'dentistimo/';
 
 dotenv.config();
 
@@ -20,7 +20,7 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
 });
 
 client.on('connect', (err) => {
-  client.subscribe(deviceRoot + 'appointments');
+  client.subscribe(root + 'appointments');
 });
 
 client.on('message', (topic, message) => {
