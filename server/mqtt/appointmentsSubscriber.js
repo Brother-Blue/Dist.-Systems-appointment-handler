@@ -4,8 +4,15 @@ const mongodb = require("mongodb");
 const mongoClient = mongodb.MongoClient;
 const { publish } = require('./publisher');
 const root = 'dentistimo/';
+const CircuitBreaker = require('opossum')
 
 dotenv.config();
+
+const options = {
+  timeout: 10000, //If function takes longer than xx sec, trigger a failure
+  errorHandlingPercentage: 50, //If xx% of requests fail, trigger circuit
+  resetTimeout: 30000 //After xx seconds try again
+}
 
 let db;
 
@@ -29,16 +36,26 @@ client.on('connect', (err) => {
 
 client.on("message", (topic, message) => {
   let data = JSON.parse(message);
+  let breaker;
 
   switch (data.method) {
     case "add":
-      insertAppointment(data);
+      breaker = new CircuitBreaker(insertAppointment(data), options)
+      breaker.fire()
+      .then(console.log)
+      .catch(console.error)
       break;
     case "getAll":
-      getAllAppointments();
+      breaker = new CircuitBreaker(getAllAppointments, options)
+      breaker.fire()
+      .then(console.log)
+      .catch(console.error)
       break;
     case "getOne":
-      getAppointment(data._id);
+      breaker = new CircuitBreaker(getAppointment(data._id), options)
+      breaker.fire()
+      .then(console.log)
+      .catch(console.error)
       break;
     default:
       return console.log("Invalid method");
@@ -46,49 +63,74 @@ client.on("message", (topic, message) => {
 });
 
 const insertAppointment = (data) => {
+  return new Promise((resolve, reject) => {
+    db.collection("appointments").insertOne({
+      userid: data.userid,
+      requestid: data.requestid,
+      dentistid: data.dentistid,
+      issuance: data.issuance,
+      time: data.time,
+    }).then((result) => {
+      console.log(data.userid + " " + data.requestid + " " + data.dentistid + data.issuance + data.time);
+  
+      let payload = JSON.stringify({
+        date: data.time,
+        emailaddress: data.emailaddress,
+        name: data.name,
+      });
+      console.log(payload);
+      publish("notifier", payload);
+      publish("log/general", payload);
+      console.log(" >> Appointment added.");
 
-  console.log(data);
+    }).then(() => {
+      resolve({data: "Success"})
 
-  db.collection("appointments").insertOne({
-    userid: data.userid,
-    requestid: data.requestid,
-    dentistid: data.dentistid,
-    issuance: data.issuance,
-    time: data.time,
-  });
+    }).catch((err) => {
+      console.log("Appointment insertion failed")
+      publish("log/error", err)
+      reject({data: "Failure"})
+    })
+  })
 
-  console.log(data.userid + " " + data.requestid + " " + data.dentistid + data.issuance + data.time);
 
-  let payload = JSON.stringify({
-    date: data.time,
-    emailaddress: data.emailaddress,
-    name: data.name,
-  });
-  console.log(payload);
-  publish("notifier", payload);
-  publish("log/general", payload);
-
-  console.log(" >> Appointment added.");
 };
 
 const getAllAppointments = () => {
-  db.collection("appointments")
+  return new Promise((resolve, reject) => {
+    db.collection("appointments")
     .find({})
-    .toArray((err, appointments) => {
-      if (err) console.error(err);
-      const message = JSON.stringify(appointments);
+    .toArray()
+    .then((result) => {
+      const message = JSON.stringify(result);
       publish("appointments", message);
       console.log(appointments);
+      resolve({data: "Success"})
+    })
+    .catch((err) => {
+      console.log(err)
+      publish("log/error", err)
+      reject({data: "Failure"})
     });
+  })
 };
 
 const getAppointment = (appointmentID) => {
-  db.collection("appointments")
+  return new Promise((resolve, reject) => {
+    db.collection("appointments")
     .find({ _id: appointmentID })
-    .toArray((err, appointment) => {
-      if (err) console.error(err);
-      const message = JSON.stringify(appointment);
+    .toArray()
+    .then((result) => {
+      const message = JSON.stringify(result);
       publish("root/appointments", message);
       console.log(appointment);
-    });
+      resolve({data: "Success"})
+    })
+    .catch((err) => {
+      console.log(err)
+      publish("log/error", err)
+      reject({data: "Failure"})
+    })
+  })
+  
 };
