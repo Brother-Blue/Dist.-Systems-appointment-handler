@@ -29,7 +29,7 @@ client.on("connect", (err) => {
 
 client.on("message", (topic, message) => {
   let data = JSON.parse(message);
-
+  console.log(data.method)
   switch (data.method) {
     case "add":
       insertAppointment(data);
@@ -39,6 +39,9 @@ client.on("message", (topic, message) => {
       break;
     case "getOne":
       getAppointment(data._id);
+      break;
+    case "getOffice":
+      getOfficeAppointment(data.dentistid);
       break;
     default:
       return console.log("Invalid method");
@@ -88,7 +91,18 @@ const getAppointment = (appointmentID) => {
     .toArray((err, appointment) => {
       if (err) console.error(err);
       const message = JSON.stringify(appointment);
-      publish("root/appointments", message);
+      publish("appointments", message);
       console.log(appointment);
     });
 };
+
+const getOfficeAppointment = (officeID) => [
+  db.collection("appointments")
+    .find({ dentistid: officeID })
+    .toArray((err, appointment) => {
+      if (err) console.log(err);
+      const message = JSON.stringify(appointment);
+      publish("appointments", message);
+      console.log(message);
+    })
+]
