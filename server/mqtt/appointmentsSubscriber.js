@@ -29,7 +29,6 @@ client.on("connect", (err) => {
 
 client.on("message", (topic, message) => {
   let data = JSON.parse(message);
-  console.log(data.method)
   switch (data.method) {
     case "add":
       insertAppointment(data);
@@ -96,13 +95,13 @@ const getAppointment = (appointmentID) => {
     });
 };
 
-const getOfficeAppointment = (officeID) => [
+const getOfficeAppointment = (officeID) => {
   db.collection("appointments")
     .find({ dentistid: officeID })
     .toArray((err, appointment) => {
       if (err) console.log(err);
       const message = JSON.stringify(appointment);
-      publish("appointments", message);
-      console.log(message);
+      publish("appointments/office", message);
+      console.log(appointment);
     })
-]
+};
