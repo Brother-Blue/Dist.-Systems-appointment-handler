@@ -161,7 +161,6 @@ const getAllTimeslots = () => {
         officeArray[i].openinghours.friday
       );
       officesArray.push(office);
-      console.log(office)
     }
     publish("dentists/offices/timeslots", JSON.stringify(officesArray), 1);
   }, 1000);
