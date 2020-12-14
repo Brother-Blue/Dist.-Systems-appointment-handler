@@ -10,9 +10,9 @@ const CircuitBreaker = require('opossum')
 dotenv.config();
 
 const options = {
-    timeout: 3000, //If function takes longer than 3sec, trigger a failure
+    timeout: 10000, //If function takes longer than 3sec, trigger a failure
     errorHandlingPercentage: 50, //If 50% of requests fail, trigger circuit
-    resetTimeout: 3000 //After xx seconds try again
+    resetTimeout: 30000 //After xx seconds try again
 }
 
 let db;
