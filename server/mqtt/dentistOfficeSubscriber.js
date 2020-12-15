@@ -123,6 +123,51 @@ const getDentistOffice = (dentistId) => {
     });
 };
 
+const getAllTimeslots = () => {
+  let officeArray = [];
+  db.collection("dentistoffices")
+    .find({})
+    .toArray((err, dentistoffices) => {
+      if (err) console.error(err);
+      officeArray = dentistoffices;
+    });
+  setTimeout(() => {
+    let officesArray = [];
+    for (let i = 0; i < officeArray.length; i++) {
+      let office = {
+        id: "",
+        name: "",
+        timeslots: {
+          monday: [],
+          tuesday: [],
+          wednesday: [],
+          thursday: [],
+          friday: [],
+        },
+      };
+      office.id = officeArray[i].id;
+      office.name = officeArray[i].name;
+      office.timeslots.monday = getTimeSlots(
+        officeArray[i].openinghours.monday
+      );
+      office.timeslots.tuesday = getTimeSlots(
+        officeArray[i].openinghours.tuesday
+      );
+      office.timeslots.wednesday = getTimeSlots(
+        officeArray[i].openinghours.wednesday
+      );
+      office.timeslots.thursday = getTimeSlots(
+        officeArray[i].openinghours.thursday
+      );
+      office.timeslots.friday = getTimeSlots(
+        officeArray[i].openinghours.friday
+      );
+      officesArray.push(office);
+    }
+    publish("dentists/offices/timeslots", JSON.stringify(officesArray), 1);
+  }, 1000);
+};
+
 const getTimeSlots =  (dentistId, date) => {
   let appointments = [];
   let officeArray = [];
