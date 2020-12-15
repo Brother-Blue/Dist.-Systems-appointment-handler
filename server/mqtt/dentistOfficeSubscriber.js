@@ -167,60 +167,55 @@ const getAllTimeslots = () => {
     publish("dentists/offices/timeslots", JSON.stringify(officesArray), 1);
   }, 1000);
 };
-const getTimeSlots = (dentistId, date) => {
+const getTimeSlots =  (dentistId, date) => {
+  let appointments = [];
+  let officeArray = [];
 
-  const office = '';
   db.collection("dentistoffices")
     .find({ id: parseInt(dentistId) })
-    .toArray((err, dentistoffice) => {
+    .toArray((err, dentistoffices) => {
       if (err) console.error(err);
-      if (dentistoffice == null) console.log("Dentist office does not exist");
-      this.office = JSON.stringify(dentistoffice);
-      
+      officeArray = dentistoffices[0];
     });
 
-    console.log('dentist office: '+office)
-
-    
-  
-  let appointments = '';
-  
-  db.collection("appointments")
+    db.collection("appointments")
     .find({ dentistid: dentistId })
     .toArray((err, appointment) => {
       if (err) console.error(err);
-      appointments = appointment;
+      appointments = appointment[0];
     });
 
-    console.log('appointments: '+appointments)
-  
   const daySelected = new Date(date).getDay()
-  let timeSlot = '';
+  let timeSlot = [];
+  let Blacklist = [];
 
-  switch (daySelected) {
-    case "1":
-      timeSlot = calcTimeSlots(dentistoffice.openinghours.monday);
-      break;
+  setTimeout(() => {
+    switch (daySelected) {
+      case 1:
+        timeSlot = calcTimeSlots(officeArray.openinghours.monday);
+        break;
 
-    case "2":
-      ttimeSlot = calcTimeSlots(dentistoffice.openinghours.tuesday);
-      break;
-  
-    case "3":
-      timeSlot = calcTimeSlots(dentistoffice.openinghours.wednesday);
-      break;
+      case 2:
+        timeSlot = calcTimeSlots(officeArray.openinghours.tuesday);
+        break;
+    
+      case 3:
+        timeSlot = calcTimeSlots(officeArray.openinghours.wednesday);
+        break;
 
-    case "4":
-      timeSlot = calcTimeSlots(dentistoffice.openinghours.thursday);
-      break;
+      case 4:
+        console.log(officeArray)
+        timeSlot = calcTimeSlots(officeArray.openinghours.thursday);
+        break;
 
-    case "5":
-      timeSlot = calcTimeSlots(dentistoffice.openinghours.friday);
-      break;
+      case 5:
+        timeSlot = calcTimeSlots(officeArray.openinghours.friday);
+        break;
+      }
 
-    default:
-      return console.log("Invalid method");
-  }
+      
+
+    }, 1000);
 };
 
 
