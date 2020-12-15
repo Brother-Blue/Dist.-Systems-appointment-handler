@@ -25,7 +25,7 @@ mongoClient.connect(
     if (err) return console.error(err);
     db = client.db("root-test");
     updateDentistOffices();
-    getAllTimeslots();
+    getTimeSlots(1, 2020-12-16)
   }
 );
 
@@ -48,6 +48,8 @@ client.on("message", (topic, message) => {
     case "getAllTimeslots":
       getAllTimeslots();
       break;
+    case "getTimeSlots":
+      getTimeSlots(data.id, data.date)
     default:
       return console.log("Invalid method");
   }
@@ -165,7 +167,64 @@ const getAllTimeslots = () => {
     publish("dentists/offices/timeslots", JSON.stringify(officesArray), 1);
   }, 1000);
 };
-getTimeSlots = function (dailyhours) {
+const getTimeSlots = (dentistId, date) => {
+
+  const office = '';
+  db.collection("dentistoffices")
+    .find({ id: parseInt(dentistId) })
+    .toArray((err, dentistoffice) => {
+      if (err) console.error(err);
+      if (dentistoffice == null) console.log("Dentist office does not exist");
+      this.office = JSON.stringify(dentistoffice);
+      
+    });
+
+    console.log('dentist office: '+office)
+
+    
+  
+  let appointments = '';
+  
+  db.collection("appointments")
+    .find({ dentistid: dentistId })
+    .toArray((err, appointment) => {
+      if (err) console.error(err);
+      appointments = appointment;
+    });
+
+    console.log('appointments: '+appointments)
+  
+  const daySelected = new Date(date).getDay()
+  let timeSlot = '';
+
+  switch (daySelected) {
+    case "1":
+      timeSlot = calcTimeSlots(dentistoffice.openinghours.monday);
+      break;
+
+    case "2":
+      ttimeSlot = calcTimeSlots(dentistoffice.openinghours.tuesday);
+      break;
+  
+    case "3":
+      timeSlot = calcTimeSlots(dentistoffice.openinghours.wednesday);
+      break;
+
+    case "4":
+      timeSlot = calcTimeSlots(dentistoffice.openinghours.thursday);
+      break;
+
+    case "5":
+      timeSlot = calcTimeSlots(dentistoffice.openinghours.friday);
+      break;
+
+    default:
+      return console.log("Invalid method");
+  }
+};
+
+
+calcTimeSlots = function (dailyhours) {
   var res = dailyhours.split("-");
   let openingHour = res[0].split(":");
   let closingHour = res[1].split(":");
