@@ -25,8 +25,6 @@ mongoClient.connect(
     if (err) return console.error(err);
     db = client.db("root-test");
     updateDentistOffices();
-    let whatever = "2020-12-16";  
-    getTimeSlots(1,whatever )
   }
 );
 
@@ -124,6 +122,7 @@ const getDentistOffice = (dentistId) => {
       publish("dentists/dentist", message);
     });
 };
+
 const getAllTimeslots = () => {
   let officeArray = [];
   db.collection("dentistoffices")
@@ -168,6 +167,7 @@ const getAllTimeslots = () => {
     publish("dentists/offices/timeslots", JSON.stringify(officesArray), 1);
   }, 1000);
 };
+
 const getTimeSlots =  (dentistId, date) => {
   let appointments = [];
   let officeArray = [];
@@ -235,9 +235,9 @@ const getTimeSlots =  (dentistId, date) => {
       for (let i = 0; i<removeDate.length; i++) {
         timeSlot.splice(timeSlot.indexOf(removeDate[i]), 1)
       }
+      publish("dentists/offices/timeslots", JSON.stringify(officesArray), 1);
     }, 1000);
 };
-
 
 calcTimeSlots = function (dailyhours) {
   var res = dailyhours.split("-");
