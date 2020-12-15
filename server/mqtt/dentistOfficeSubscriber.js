@@ -25,7 +25,8 @@ mongoClient.connect(
     if (err) return console.error(err);
     db = client.db("root-test");
     updateDentistOffices();
-    getTimeSlots(1, 2020-12-16)
+    let whatever = "2020-12-16";  
+    getTimeSlots(1,whatever )
   }
 );
 
@@ -179,15 +180,16 @@ const getTimeSlots =  (dentistId, date) => {
     });
 
     db.collection("appointments")
-    .find({ dentistid: dentistId })
+    .find({ dentistid: String(dentistId) })
     .toArray((err, appointment) => {
       if (err) console.error(err);
-      appointments = appointment[0];
+      appointments = appointment;
     });
 
   const daySelected = new Date(date).getDay()
   let timeSlot = [];
-  let Blacklist = [];
+  let busyDate = [];
+  let removeDate = [];
 
   setTimeout(() => {
     switch (daySelected) {
@@ -204,7 +206,6 @@ const getTimeSlots =  (dentistId, date) => {
         break;
 
       case 4:
-        console.log(officeArray)
         timeSlot = calcTimeSlots(officeArray.openinghours.thursday);
         break;
 
@@ -212,9 +213,28 @@ const getTimeSlots =  (dentistId, date) => {
         timeSlot = calcTimeSlots(officeArray.openinghours.friday);
         break;
       }
-
-      
-
+      for ( let i = 0 ; i < appointments.length ; i++ ) {
+        let time = appointments[i].time.split(" ");
+        if ( time[0] === date) {
+          busyDate.push(time[1])
+        }
+      }
+      if ( officeArray.dentists > 1 ) {
+        for ( let i = 0 ; i < busyDate.length ; i++ ) {
+          let counter = 0;
+          for ( let k = 0 ; k < busyDate.length ; k++ ) {
+            if ( busyDate[i] === busyDate[k] ) {
+              counter++;
+            }
+          }
+          if ( counter >= officeArray.dentists) {
+            removeDate.push(busyDate[i])
+          }
+        }
+      }
+      for (let i = 0; i<removeDate.length; i++) {
+        timeSlot.splice(timeSlot.indexOf(removeDate[i]), 1)
+      }
     }, 1000);
 };
 
