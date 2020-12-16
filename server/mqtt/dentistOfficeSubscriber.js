@@ -217,7 +217,6 @@ const getTimeSlots =  (dentistId, date) => {
       for ( let i = 0 ; i < appointments.length ; i++ ) {
         let time = appointments[i].time.split(" ");
         if ( time[0] === date) {
-          console.log('date exists: '+time[1])
           busyDate.push(time[1])
         }
       }
@@ -230,13 +229,11 @@ const getTimeSlots =  (dentistId, date) => {
             }
           }
           if ( counter >= officeArray.dentists) {
-            console.log('overbooked date: '+busyDate[i])
             removeDate.push(busyDate[i])
           }
         }
       }
       for (let i = 0; i<removeDate.length; i++) {
-        console.log('removing: '+removeDate[i])
         timeSlot = timeSlot.filter(val => !removeDate.includes(val))
       }
       publish("dentists/offices/timeslots", JSON.stringify(timeSlot), 1);
