@@ -11,9 +11,9 @@ const { resolve } = require("path");
 dotenv.config();
 
 const options = {
-    timeout: 10000, //If function takes longer than 3sec, trigger a failure
-    errorHandlingPercentage: 50, //If 50% of requests fail, trigger circuit
-    resetTimeout: 30000 //After xx seconds try again
+  timeout: 10000, //If function takes longer than 10 sec, trigger a failure
+  errorHandlingPercentage: 10, //If 10% of requests fail, trigger circuit
+  resetTimeout: 30000 //After 30 seconds try again
 }
 
 let db;
@@ -50,24 +50,28 @@ client.on('message', (topic, message) => {
     switch(method) {
         case 'getAll':
             breaker = new CircuitBreaker(getAllDentistOffices(), options)
+            breaker.fallback(() => "Sorry, out of service right now");
             breaker.fire()
             .then(console.log)
             .catch(console.error)
             break;
         case 'getOne': 
             breaker = new CircuitBreaker(getDentistOffice(data.id), options)
+            breaker.fallback(() => "Sorry, out of service right now");
             breaker.fire()
             .then(console.log)
             .catch(console.error)
             break;
         case 'getAllTimeslots':
             breaker = new CircuitBreaker(getAllTimeslots, options)
+            breaker.fallback(() => "Sorry, out of service right now");
             breaker.fire()
             .then(console.log)
             .catch(console.error)
             break;
         case 'getTimeSlots':
             breaker = new CircuitBreaker(getTimeSlots(data.id, data.date), options)
+            breaker.fallback(() => "Sorry, out of service right now");
             breaker.fire()
             .then(console.log)
             .catch(console.error)
@@ -80,48 +84,48 @@ client.on('message', (topic, message) => {
 const updateDentistOffices = () => {
     return new Promise((resolve, reject) => {
 
-            fetch(url, settings)
-            .then(res => res.json())
-            .then((json) => {
-                
-                var result = [];
+      fetch(url, settings)
+      .then(res => res.json())
+      .then((json) => {
         
-                for(var i = 0; i < json.dentists.length; i++){
-                    result.push(json.dentists[i]);
+        var result = [];
+
+        for(var i = 0; i < json.dentists.length; i++){
+            result.push(json.dentists[i]);
+        }
+
+        for(var i in result){
+          db.collection('dentistoffices').updateOne(
+            { "id": result[i].id },
+            { $set: {
+                "id": result[i].id,
+                "name": result[i].name,
+                "owner": result[i].owner,
+                "dentists": result[i].dentists,
+                "address": result[i].address,
+                "city": result[i].city,
+                "coordinate": {
+                    "longitude": result[i].coordinate.longitude,
+                    "latitude": result[i].coordinate.latitude
+                },
+                "openinghours": {
+                    "monday": result[i].openinghours.monday,
+                    "tuesday": result[i].openinghours.tuesday,
+                    "wednesday": result[i].openinghours.wednesday,
+                    "thursday": result[i].openinghours.thursday,
+                    "friday": result[i].openinghours.friday
                 }
-        
-                for(var i in result){
-                    db.collection('dentistoffices').updateOne(
-                        { "id": result[i].id },
-                        { $set: {
-                            "id": result[i].id,
-                            "name": result[i].name,
-                            "owner": result[i].owner,
-                            "dentists": result[i].dentists,
-                            "address": result[i].address,
-                            "city": result[i].city,
-                            "coordinate": {
-                                "longitude": result[i].coordinate.longitude,
-                                "latitude": result[i].coordinate.latitude
-                            },
-                            "openinghours": {
-                                "monday": result[i].openinghours.monday,
-                                "tuesday": result[i].openinghours.tuesday,
-                                "wednesday": result[i].openinghours.wednesday,
-                                "thursday": result[i].openinghours.thursday,
-                                "friday": result[i].openinghours.friday
-                            }
-                        }},
-                        {upsert: true})
-                }
-                console.log(' > Dentist office collecton updated.')
-                resolve({data: "Success"})
-            }).catch(err => {
-                publish('log/error', err);
-                console.log(err);
-                reject({data: "Failure"})
-            });
-        
+            }},
+            {upsert: true})
+        }
+        console.log(' > Dentist office collecton updated.')
+        resolve({data: "Success"})
+      }).catch(err => {
+          publish('log/error', err);
+          console.log(err);
+          reject({data: "Failure"})
+      });
+
     })
 }
 
