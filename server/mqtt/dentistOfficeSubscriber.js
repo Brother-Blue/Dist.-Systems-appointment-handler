@@ -50,24 +50,28 @@ client.on('message', (topic, message) => {
     switch(method) {
         case 'getAll':
             breaker = new CircuitBreaker(getAllDentistOffices(), options)
+            breaker.fallback(() => "Sorry, out of service right now");
             breaker.fire()
             .then(console.log)
             .catch(console.error)
             break;
         case 'getOne': 
             breaker = new CircuitBreaker(getDentistOffice(data.id), options)
+            breaker.fallback(() => "Sorry, out of service right now");
             breaker.fire()
             .then(console.log)
             .catch(console.error)
             break;
         case 'getAllTimeslots':
             breaker = new CircuitBreaker(getAllTimeslots, options)
+            breaker.fallback(() => "Sorry, out of service right now");
             breaker.fire()
             .then(console.log)
             .catch(console.error)
             break;
         case 'getTimeSlots':
             breaker = new CircuitBreaker(getTimeSlots(data.id, data.date), options)
+            breaker.fallback(() => "Sorry, out of service right now");
             breaker.fire()
             .then(console.log)
             .catch(console.error)
