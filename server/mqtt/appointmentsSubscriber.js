@@ -68,40 +68,57 @@ const insertAppointment = (data) => {
     db.collection("appointments")
     .find({ time: data.time })
     .toArray()
-    .then((result) => {
-      if(result == ''){
-        db.collection("appointments").insertOne({
-          userid: data.userid,
-          requestid: data.requestid,
-          dentistid: data.dentistid,
-          issuance: data.issuance,
-          time: data.time,
-        }).then((result) => {      
-          let payload = JSON.stringify({
-            date: data.time,
-            emailaddress: data.emailaddress,
-            name: data.name,
-          });
-          publish("notifier", payload);
-          publish("log/general", payload);
-
-          console.log(" >> Appointment added.");
-    
-        }).then(() => {
-          let response = JSON.stringify({
+    .then((appointmentresult) => {
+      db.collection('dentistoffices').find({id : parseInt(data.dentistid)}).toArray()
+      .then((officeresult) => {
+        console.log('appointmentresult.length ' +appointmentresult.length)
+        console.log('officeresult.dentists ' + officeresult[0].dentists)
+        if(appointmentresult == '' || appointmentresult.length < parseInt(officeresult[0].dentists)){
+          db.collection("appointments").insertOne({
             userid: data.userid,
             requestid: data.requestid,
+            dentistid: data.dentistid,
+            issuance: data.issuance,
             time: data.time,
-            success: true
+          }).then(() => {      
+            let payload = JSON.stringify({
+              date: data.time,
+              emailaddress: data.emailaddress,
+              name: data.name,
+            });
+            publish("notifier", payload);
+            publish("log/general", payload);
+  
+            console.log(" >> Appointment added.");
+      
+          }).then(() => {
+            let response = JSON.stringify({
+              userid: data.userid,
+              requestid: data.requestid,
+              time: data.time,
+              success: true
+            })
+            let date = data.time.split(' ')[0]
+            publish('dentistoffice', JSON.stringify({'method': 'getTimeSlots', 'id': data.dentistid, 'date': date}) )
+  
+            publish("appointments/response", response)
+            resolve({data: "Success"})
+      
+          }).catch((err) => {
+                let response = JSON.stringify({
+              userid: data.userid,
+              requestid: data.requestid,
+              time: data.time,
+              success: false
+            })
+      
+            console.log("Appointment insertion failed")
+            publish("log/error", err)
+            publish("appointments/response", response)
+            reject({data: "Failure"})
           })
-          let date = data.time.split(' ')[0]
-          publish('dentistoffice', JSON.stringify({'method': 'getTimeSlots', 'id': data.dentistid, 'date': date}) )
-
-          publish("appointments/response", response)
-          resolve({data: "Success"})
-    
-        }).catch((err) => {
-              let response = JSON.stringify({
+        } else {
+          let response = JSON.stringify({
             userid: data.userid,
             requestid: data.requestid,
             time: data.time,
@@ -109,23 +126,12 @@ const insertAppointment = (data) => {
           })
     
           console.log("Appointment insertion failed")
-          publish("log/error", err)
+          publish("log/error", 'Appointment insertion failed')
           publish("appointments/response", response)
           reject({data: "Failure"})
-        })
-      } else {
-        let response = JSON.stringify({
-          userid: data.userid,
-          requestid: data.requestid,
-          time: data.time,
-          success: false
-        })
-  
-        console.log("Appointment insertion failed")
-        publish("log/error", 'Appointment insertion failed')
-        publish("appointments/response", response)
-        reject({data: "Failure"})
-      }
+        }
+      })
+      
       
     })
     })
