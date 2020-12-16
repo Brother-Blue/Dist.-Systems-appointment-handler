@@ -193,30 +193,32 @@ const getAllTimeslots = () => {
 
 }
 
-const getTimeSlots =  (dentistId, date) => {
+async function getTimeSlots (dentistId, date) {
   let appointments = [];
   let officeArray = [];
 
-  db.collection("dentistoffices")
+  await db.collection("dentistoffices")
     .find({ id: parseInt(dentistId) })
-    .toArray((err, dentistoffices) => {
-      if (err) console.error(err);
-      officeArray = dentistoffices[0];
+    .toArray()
+    .then((result) => {
+      officeArray = result[0]
+      console.log(officeArray)
+
+    })
+
+  await db.collection("appointments")
+    .find({ dentistid: String(dentistId) })
+    .toArray()
+    .then((result) => {
+      appointments = result;
     });
 
-    db.collection("appointments")
-    .find({ dentistid: String(dentistId) })
-    .toArray((err, appointment) => {
-      if (err) console.error(err);
-      appointments = appointment;
-    });
 
   const daySelected = new Date(date).getDay()
   let timeSlot = [];
   let busyDate = [];
   let removeDate = [];
 
-  setTimeout(() => {
     switch (daySelected) {
       case 1:
         timeSlot = calcTimeSlots(officeArray.openinghours.monday);
@@ -245,25 +247,24 @@ const getTimeSlots =  (dentistId, date) => {
           busyDate.push(time[1])
         }
       }
-      if ( officeArray.dentists > 1 ) {
-        for ( let i = 0 ; i < busyDate.length ; i++ ) {
-          let counter = 0;
-          for ( let k = 0 ; k < busyDate.length ; k++ ) {
-            if ( busyDate[i] === busyDate[k] ) {
-              counter++;
-            }
-          }
-          if ( counter >= officeArray.dentists) {
-            removeDate.push(busyDate[i])
+      for ( let i = 0 ; i < busyDate.length ; i++ ) {
+        let counter = 0;
+        for ( let k = 0 ; k < busyDate.length ; k++ ) {
+          if ( busyDate[i] === busyDate[k] ) {
+            counter++;
           }
         }
+        if ( counter >= officeArray.dentists) {
+          removeDate.push(busyDate[i])
+        }
       }
+      
       for (let i = 0; i<removeDate.length; i++) {
         timeSlot = timeSlot.filter(val => !removeDate.includes(val))
       }
       publish("dentists/offices/timeslots", JSON.stringify(timeSlot), 1);
       console.log(timeSlot)
-    }, 50);
+      
 };
 
 calcTimeSlots = function (dailyhours) {
