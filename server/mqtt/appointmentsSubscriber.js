@@ -72,21 +72,21 @@ const insertAppointment = (data) => {
       issuance: data.issuance,
       time: data.time,
     }).then((result) => {
-      console.log(data.userid + " " + data.requestid + " " + data.dentistid + data.issuance + data.time);
+      //console.log(data.userid + " " + data.requestid + " " + data.dentistid + data.issuance + data.time);
   
       let payload = JSON.stringify({
         date: data.time,
         emailaddress: data.emailaddress,
         name: data.name,
       });
-      console.log(payload);
+      //console.log(payload);
       publish("notifier", payload);
       publish("log/general", payload);
       console.log(" >> Appointment added.");
 
     }).then(() => {
 
-      console.log(data.userid + " " + data.requestid + " " + data.dentistid + data.issuance + data.time);
+      //console.log(data.userid + " " + data.requestid + " " + data.dentistid + data.issuance + data.time);
       let response = JSON.stringify({
         userid: data.userid,
         requestid: data.requestid,
@@ -99,7 +99,7 @@ const insertAppointment = (data) => {
 
     }).catch((err) => {
 
-      console.log(data.userid + " " + data.requestid + " " + data.dentistid + data.issuance + data.time);
+      //console.log(data.userid + " " + data.requestid + " " + data.dentistid + data.issuance + data.time);
       let response = JSON.stringify({
         userid: data.userid,
         requestid: data.requestid,
@@ -125,7 +125,7 @@ const getAllAppointments = () => {
     .then((result) => {
       const message = JSON.stringify(result);
       publish("appointments", message);
-      console.log(appointments);
+      //console.log(appointments);
       resolve({data: "Success"})
     })
     .catch((err) => {
@@ -144,7 +144,7 @@ const getAppointment = (appointmentID) => {
       if (err) console.error(err);
       const message = JSON.stringify(appointment);
       publish("appointments", message);
-      console.log(appointment);
+      //console.log(appointment);
       resolve({data: "Success"})
     })
     .catch((err) => {
@@ -163,6 +163,6 @@ const getOfficeAppointment = (officeID) => {
       if (err) console.log(err);
       const message = JSON.stringify(appointment);
       publish("appointments/office", message);
-      console.log(appointment);
+      //console.log(appointment);
     })
 };
