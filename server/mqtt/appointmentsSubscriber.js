@@ -9,9 +9,9 @@ const CircuitBreaker = require('opossum')
 dotenv.config();
 
 const options = {
-  timeout: 10000, //If function takes longer than xx sec, trigger a failure
-  errorHandlingPercentage: 50, //If xx% of requests fail, trigger circuit
-  resetTimeout: 30000 //After xx seconds try again
+  timeout: 10000, //If function takes longer than 10 sec, trigger a failure
+  errorHandlingPercentage: 10, //If 10% of requests fail, trigger circuit
+  resetTimeout: 30000 //After 30 seconds try again
 }
 
 let db;
@@ -39,24 +39,31 @@ client.on("message", (topic, message) => {
   switch (data.method) {
     case "add":
       breaker = new CircuitBreaker(insertAppointment(data), options)
+      breaker.fallback(() => "Sorry, out of service right now");
       breaker.fire()
       .then(console.log)
       .catch(console.error)
       break;
     case "getAll":
       breaker = new CircuitBreaker(getAllAppointments, options)
+      breaker.fallback(() => "Sorry, out of service right now");
       breaker.fire()
       .then(console.log)
       .catch(console.error)
       break;
     case "getOne":
       breaker = new CircuitBreaker(getAppointment(data._id), options)
+      breaker.fallback(() => "Sorry, out of service right now");
       breaker.fire()
       .then(console.log)
       .catch(console.error)
       break;
     case "getOffice":
-      getOfficeAppointment(data.dentistid);
+      breaker = new CircuitBreaker(getOfficeAppointment(data.dentistid), options)
+      breaker.fallback(() => "Sorry, out of service right now");
+      breaker.fire()
+      .then(console.log)
+      .catch(console.error)
       break;
     default:
       return console.log("Invalid method");
