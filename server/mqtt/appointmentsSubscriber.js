@@ -85,11 +85,31 @@ const insertAppointment = (data) => {
       console.log(" >> Appointment added.");
 
     }).then(() => {
+
+      console.log(data.userid + " " + data.requestid + " " + data.dentistid + data.issuance + data.time);
+      let response = JSON.stringify({
+        userid: data.userid,
+        requestid: data.requestid,
+        time: data.time,
+        success: true
+      })
+
+      publish("appointments/response", response)
       resolve({data: "Success"})
 
     }).catch((err) => {
+
+      console.log(data.userid + " " + data.requestid + " " + data.dentistid + data.issuance + data.time);
+      let response = JSON.stringify({
+        userid: data.userid,
+        requestid: data.requestid,
+        time: data.time,
+        success: false
+      })
+
       console.log("Appointment insertion failed")
       publish("log/error", err)
+      publish("appointments/response", response)
       reject({data: "Failure"})
     })
   })
