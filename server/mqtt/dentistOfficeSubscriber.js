@@ -67,7 +67,10 @@ client.on('message', (topic, message) => {
             .catch(console.error)
             break;
         case 'getTimeSlots':
-            getTimeSlots(data.id, data.date)
+            breaker = new CircuitBreaker(getTimeSlots(data.id, data.date), options)
+            breaker.fire()
+            .then(console.log)
+            .catch(console.error)
             break
         default:
             return console.log('Invalid method')
