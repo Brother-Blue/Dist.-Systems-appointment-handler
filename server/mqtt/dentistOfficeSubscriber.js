@@ -65,6 +65,9 @@ client.on('message', (topic, message) => {
             .then(console.log)
             .catch(console.error)
             break;
+        case 'getTimeSlots':
+            getTimeSlots(data.id, data.date)
+            break
         default:
             return console.log('Invalid method')
     }
@@ -189,19 +192,93 @@ const getAllTimeslots = () => {
     })
 
 }
- getTimeSlots = function (dailyhours) {
-    var res= dailyhours.split("-"); 
-    let openingHour = res[0].split(":");
-    let closingHour = res[1].split(":");
-    var timeslots = [];
-    var i;
+
+const getTimeSlots =  (dentistId, date) => {
+  let appointments = [];
+  let officeArray = [];
+
+  db.collection("dentistoffices")
+    .find({ id: parseInt(dentistId) })
+    .toArray((err, dentistoffices) => {
+      if (err) console.error(err);
+      officeArray = dentistoffices[0];
+    });
+
+    db.collection("appointments")
+    .find({ dentistid: String(dentistId) })
+    .toArray((err, appointment) => {
+      if (err) console.error(err);
+      appointments = appointment;
+    });
+
+  const daySelected = new Date(date).getDay()
+  let timeSlot = [];
+  let busyDate = [];
+  let removeDate = [];
+
+  setTimeout(() => {
+    switch (daySelected) {
+      case 1:
+        timeSlot = calcTimeSlots(officeArray.openinghours.monday);
+        break;
+
+      case 2:
+        timeSlot = calcTimeSlots(officeArray.openinghours.tuesday);
+        break;
+    
+      case 3:
+        timeSlot = calcTimeSlots(officeArray.openinghours.wednesday);
+        break;
+
+      case 4:
+        timeSlot = calcTimeSlots(officeArray.openinghours.thursday);
+        break;
+
+      case 5:
+        timeSlot = calcTimeSlots(officeArray.openinghours.friday);
+        break;
+      }
+      console.log(timeSlot);
+      for ( let i = 0 ; i < appointments.length ; i++ ) {
+        let time = appointments[i].time.split(" ");
+        if ( time[0] === date) {
+          busyDate.push(time[1])
+        }
+      }
+      if ( officeArray.dentists > 1 ) {
+        for ( let i = 0 ; i < busyDate.length ; i++ ) {
+          let counter = 0;
+          for ( let k = 0 ; k < busyDate.length ; k++ ) {
+            if ( busyDate[i] === busyDate[k] ) {
+              counter++;
+            }
+          }
+          if ( counter >= officeArray.dentists) {
+            removeDate.push(busyDate[i])
+          }
+        }
+      }
+      for (let i = 0; i<removeDate.length; i++) {
+        timeSlot = timeSlot.filter(val => !removeDate.includes(val))
+      }
+      publish("dentists/offices/timeslots", JSON.stringify(timeSlot), 1);
+      console.log(timeSlot)
+    }, 50);
+};
+
+calcTimeSlots = function (dailyhours) {
+  var res = dailyhours.split("-");
+  let openingHour = res[0].split(":");
+  let closingHour = res[1].split(":");
+  var timeslots = [];
+  var i;
 
   var finalopeningHour = openingHour[0];
   var finalclosingHour = closingHour[0];
 
   for (i = parseInt(finalopeningHour); i < parseInt(finalclosingHour); i++) {
     if (i != 12) {
-      if (i != 14) {
+      if (i != 10) {
         var timeslotStart = i + ":00";
         var timeslotEnda = i + ":30";
         timeslots.push(timeslotStart + "-" + timeslotEnda);

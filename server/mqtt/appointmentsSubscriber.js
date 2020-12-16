@@ -36,8 +36,6 @@ client.on('connect', (err) => {
 
 client.on("message", (topic, message) => {
   let data = JSON.parse(message);
-  let breaker;
-
   switch (data.method) {
     case "add":
       breaker = new CircuitBreaker(insertAppointment(data), options)
@@ -56,6 +54,9 @@ client.on("message", (topic, message) => {
       breaker.fire()
       .then(console.log)
       .catch(console.error)
+      break;
+    case "getOffice":
+      getOfficeAppointment(data.dentistid);
       break;
     default:
       return console.log("Invalid method");
@@ -119,10 +120,10 @@ const getAppointment = (appointmentID) => {
   return new Promise((resolve, reject) => {
     db.collection("appointments")
     .find({ _id: appointmentID })
-    .toArray()
-    .then((result) => {
-      const message = JSON.stringify(result);
-      publish("root/appointments", message);
+    .toArray((err, appointment) => {
+      if (err) console.error(err);
+      const message = JSON.stringify(appointment);
+      publish("appointments", message);
       console.log(appointment);
       resolve({data: "Success"})
     })
@@ -133,4 +134,15 @@ const getAppointment = (appointmentID) => {
     })
   })
   
+};
+
+const getOfficeAppointment = (officeID) => {
+  db.collection("appointments")
+    .find({ dentistid: officeID })
+    .toArray((err, appointment) => {
+      if (err) console.log(err);
+      const message = JSON.stringify(appointment);
+      publish("appointments/office", message);
+      console.log(appointment);
+    })
 };
