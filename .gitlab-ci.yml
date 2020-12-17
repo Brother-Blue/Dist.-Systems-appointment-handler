@@ -2,11 +2,11 @@ image: node:latest
 
 stages:
   - build
-  tags:
-    - docker
 
 build:
   stage: build
+  tags:
+    - docker
   script:
     - cd server
     - npm install
