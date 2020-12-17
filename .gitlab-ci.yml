@@ -1,18 +1,10 @@
-image: node:10-alpine
-
-# Cache modules in between jobs per-branch
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - server/node_modules/
+image: node:latest
 
 stages:
   - build
 
 build:
   stage: build
-  tags:
-    - docker
   script:
     - cd server
     - npm install
