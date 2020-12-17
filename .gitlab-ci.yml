@@ -2,6 +2,8 @@ image: node:latest
 
 stages:
   - build
+  tags:
+    - docker
 
 build:
   stage: build
