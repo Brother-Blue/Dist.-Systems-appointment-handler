@@ -183,13 +183,3 @@ const getAppointment = (appointmentID) => {
   })
   
 };
-
-const getOfficeAppointment = (officeID) => {
-  db.collection("appointments")
-    .find({ dentistid: officeID })
-    .toArray((err, appointment) => {
-      if (err) console.log(err);
-      const message = JSON.stringify(appointment);
-      publish("appointments/office", message);
-    })
-};
