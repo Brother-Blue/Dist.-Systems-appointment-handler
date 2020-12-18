@@ -6,7 +6,6 @@ const fetch = require('node-fetch');
 const { publish } = require('./publisher')
 const root = 'dentistimo/';
 const CircuitBreaker = require('opossum');
-const { resolve } = require("path");
 
 dotenv.config();
 
@@ -17,8 +16,11 @@ const options = {
 }
 
 let db;
+
+//URL to the dentist registry file.
 let url =
   "https://raw.githubusercontent.com/feldob/dit355_2020/master/dentists.json";
+//Specify what function the fetch should work with.
 let settings = { method: "Get" };
 
 const client = mqtt.connect({
@@ -30,6 +32,7 @@ mongoClient.connect("mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.ne
   if (err) return console.error(err);
   db = client.db('root-test');
   const breaker = new CircuitBreaker(updateDentistOffices, options)
+  //Sets an interval that calls the updateDentistOffices-function every 10 minutes.
   setInterval(() => {
       breaker.fire()
     .then()
@@ -81,52 +84,63 @@ client.on('message', (topic, message) => {
     }
 })
 
+//Function to fetch data and replace the existing data in the dentistoffice-collection. 
 const updateDentistOffices = () => {
-    return new Promise((resolve, reject) => {
-
-      fetch(url, settings)
-      .then(res => res.json())
-      .then((json) => {
-        
+  return new Promise((resolve, reject) => {
+    //Uses node fetch to fetch data from the dentist registry
+    fetch(url, settings)
+    .then(res => res.json())
+    .then((json) => {
+      //Remove all existin data from the collection
+      db.collection("dentistoffices").remove()
+      .then(() => {
+        //If the removal was successful, insert the fetched data to the collection
         var result = [];
 
         for(var i = 0; i < json.dentists.length; i++){
-            result.push(json.dentists[i]);
+          result.push(json.dentists[i]);
         }
 
         for(var i in result){
           db.collection('dentistoffices').updateOne(
             { "id": result[i].id },
             { $set: {
-                "id": result[i].id,
-                "name": result[i].name,
-                "owner": result[i].owner,
-                "dentists": result[i].dentists,
-                "address": result[i].address,
-                "city": result[i].city,
-                "coordinate": {
-                    "longitude": result[i].coordinate.longitude,
-                    "latitude": result[i].coordinate.latitude
-                },
-                "openinghours": {
-                    "monday": result[i].openinghours.monday,
-                    "tuesday": result[i].openinghours.tuesday,
-                    "wednesday": result[i].openinghours.wednesday,
-                    "thursday": result[i].openinghours.thursday,
-                    "friday": result[i].openinghours.friday
-                }
+              "id": result[i].id,
+              "name": result[i].name,
+              "owner": result[i].owner,
+              "dentists": result[i].dentists,
+              "address": result[i].address,
+              "city": result[i].city,
+              "coordinate": {
+                  "longitude": result[i].coordinate.longitude,
+                  "latitude": result[i].coordinate.latitude
+              },
+              "openinghours": {
+                  "monday": result[i].openinghours.monday,
+                  "tuesday": result[i].openinghours.tuesday,
+                  "wednesday": result[i].openinghours.wednesday,
+                  "thursday": result[i].openinghours.thursday,
+                  "friday": result[i].openinghours.friday
+              }
             }},
             {upsert: true})
         }
         console.log(' > Dentist office collecton updated.')
         resolve({data: "Success"})
-      }).catch(err => {
-          publish('log/error', err);
-          console.log(err);
-          reject({data: "Failure"})
+      })
+      .catch((err) => {
+        console.log('Could not remove collection')
+        publish('log/error', err);
+        console.log(err);
+        reject({data: "Failure"})
       });
-
-    })
+    }).catch(err => {
+        console.log('Could not fetch data')
+        publish('log/error', err);
+        console.log(err);
+        reject({data: "Failure"})
+    });
+  })
 }
 
 const getAllDentistOffices = () => {
