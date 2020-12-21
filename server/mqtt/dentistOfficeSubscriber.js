@@ -45,6 +45,15 @@ client.on('connect', (err) => {
     console.log('Subscribed to dentistimo/dentistoffice');
 })
 
+client.on('offline', () => {
+  console.log('Offline')
+  client.unsubscribe(root + 'dentistoffice')
+})
+client.on('close', () => {
+  console.log('Close')
+  client.unsubscribe(root + 'dentistoffice')
+})
+
 client.on('message', (topic, message) => {
     let data = JSON.parse(message)
     const method = data.method
