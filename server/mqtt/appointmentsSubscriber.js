@@ -101,8 +101,8 @@ const insertAppointment = (data) => {
               emailaddress: data.emailaddress,
               name: data.name,
             });
-            publish("notifier", payload);
-            publish("log/general", payload);
+            publish("notifier", payload, 2);
+            publish("log/general", payload, 1);
   
             console.log(" >> Appointment added.");
       
@@ -114,9 +114,9 @@ const insertAppointment = (data) => {
               success: true
             })
             let date = data.time.split(' ')[0]
-            publish('dentistoffice', JSON.stringify({'method': 'getTimeSlots', 'id': data.dentistid, 'date': date}) )
+            publish('dentistoffice', JSON.stringify({'method': 'getTimeSlots', 'id': data.dentistid, 'date': date}), 2)
   
-            publish("appointments/response", response)
+            publish("appointments/response", response, 1)
             resolve({data: "Success"})
       
           }).catch((err) => {
@@ -128,8 +128,8 @@ const insertAppointment = (data) => {
             })
       
             console.log("Appointment insertion failed")
-            publish("log/error", err)
-            publish("appointments/response", response)
+            publish("log/error", err, 2)
+            publish("appointments/response", response, 1)
             reject({data: "Failure"})
           })
         } else {
@@ -141,8 +141,8 @@ const insertAppointment = (data) => {
           })
     
           console.log("Appointment insertion failed")
-          publish("log/error", 'Appointment insertion failed')
-          publish("appointments/response", response)
+          publish("log/error", 'Appointment insertion failed', 2)
+          publish("appointments/response", response, 1)
           reject({data: "Failure"})
         }
       })
@@ -162,12 +162,11 @@ const getAllAppointments = () => {
     .toArray()
     .then((result) => {
       const message = JSON.stringify(result);
-      publish("appointments", message);
+      publish("appointments", message, 2);
       resolve({data: "Success"})
     })
     .catch((err) => {
-      console.log(err)
-      publish("log/error", err)
+      publish("log/error", err, 2)
       reject({data: "Failure"})
     });
   })
@@ -178,14 +177,13 @@ const getAppointment = (appointmentID) => {
     db.collection("appointments")
     .find({ _id: appointmentID })
     .toArray((err, appointment) => {
-      if (err) console.error(err);
+      if (err) publish("log/error", err, 2);
       const message = JSON.stringify(appointment);
-      publish("appointments", message);
+      publish("appointments", message, 2);
       resolve({data: "Success"})
     })
     .catch((err) => {
-      console.log(err)
-      publish("log/error", err)
+      publish("log/error", err, 2)
       reject({data: "Failure"})
     })
   })
