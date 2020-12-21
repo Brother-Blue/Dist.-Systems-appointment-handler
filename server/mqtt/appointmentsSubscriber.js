@@ -21,6 +21,14 @@ const client = mqtt.connect({
   port: process.env.MQTT_PORT,
 });
 
+client.on('offline', () => {
+  console.log('Offline')
+  client.unsubscribe(root+'appointments')
+})
+client.on('close', () => {
+  console.log('Close')
+  client.unsubscribe(root+'appointments')
+})
 mongoClient.connect(
   "mongodb+srv://123123123:123123123@cluster0.5paxo.mongodb.net/Cluster0?retryWrites=true&w=majority",
   { useUnifiedTopology: true },
