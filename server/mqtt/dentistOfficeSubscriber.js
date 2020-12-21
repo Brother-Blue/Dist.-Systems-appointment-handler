@@ -139,14 +139,12 @@ const updateDentistOffices = () => {
       })
       .catch((err) => {
         console.log('Could not remove collection')
-        publish('log/error', err);
-        console.log(err);
+        publish('log/error', err, 2);
         reject({data: "Failure"})
       });
     }).catch(err => {
         console.log('Could not fetch data')
-        publish('log/error', err);
-        console.log(err);
+        publish('log/error', err, 2);
         reject({data: "Failure"})
     });
   })
@@ -157,11 +155,11 @@ const getAllDentistOffices = () => {
         db.collection('dentistoffices').find({}).toArray()
         .then((result) => {
             const message = JSON.stringify(result)
-            publish('dentists', message)
+            publish('dentists', message, 2)
             resolve({data: "Success"})
         })
         .catch((err) => {
-            console.log(err)
+            publish('log/error', err, 2);
             reject({data: "Failure"})
         })
     })
@@ -174,11 +172,11 @@ const getDentistOffice = (dentistId) => {
             var dentistoffice = result
             if(dentistoffice == null) console.log('Dentist office does not exist')
             const message = JSON.stringify(dentistoffice)
-            publish('dentists/dentist', message)
+            publish('dentists/dentist', message, 2)
             resolve({data: "Success"})
         })
         .catch((err) => {
-            console.error(err);  
+            publish('log/error', err, 2);
             reject({data: "Failure"})
         })
     })
@@ -212,11 +210,11 @@ const getAllTimeslots = () => {
                     office.timeslots.friday = (getTimeSlots(officeArray[i].openinghours.friday))
                     officesArray.push(office)
                 }
-                publish('dentists/offices/timeslots', JSON.stringify(officesArray),1)
+                publish('dentists/offices/timeslots', JSON.stringify(officesArray), 2)
                 resolve({data: "Success"})
              
         }).catch((err) => {
-            console.log(err)
+            publish('log/error', err, 2);
             reject({data: "Failure"})
         })
 
@@ -287,25 +285,20 @@ const getTimeSlots = (dentistId, date) => {
             for (let i = 0; i<removeDate.length; i++) {
               timeSlot = timeSlot.filter(val => !removeDate.includes(val))
             }
-            publish("dentists/offices/timeslots", JSON.stringify(timeSlot), 1);
-            console.log(timeSlot)
+            publish("dentists/offices/timeslots", JSON.stringify(timeSlot), 2);
             resolve({data: "Success"})
           })
           .catch((err) => {
-            publish("log/error", err)
+            publish("log/error", err, 2)
             reject({data: "Failure"})
           });
       })
       .catch((err) => {
-        publish("log/error", err)
+        publish("log/error", err, 2)
         reject({data: "Failure"})
       })
-
   })
- 
-
-
-      
+     
 };
 
 calcTimeSlots = function (dailyhours) {
