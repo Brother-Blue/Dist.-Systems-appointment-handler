@@ -1,30 +1,22 @@
-# Backend
+## AppointmentHandler high-level description
 
-# Table of contents
-1. [Purpose](#purpose)
-    1. [What](#what)
-    2. [Why](#why)
-    2. [How](#how)
-2. [Requirements (SRS)](#requirements)
-3. [Architecture (SAD)](#architecture)
-4. [Developers](#developers)
+The AppointmentHandler is responsible for all communication with the systems database, it also fetches the dentist registry file and updates the database according to the information from this file. After this it publishes the data (that is displayed on the bookingGUI) to the broker.
+It also acts as a filter for the requests since all bookingrequests sent through the broker are handled in the AppointmentHandler, it ensures that there are no unintentional duplicate appointments, and that the appointments are stored in the database correctly and publishes a response to the broker.
+Once a appointment has been added to the database, the AppointmentHandler publishes a confirmation, a log message and the filtered data to the broker.
 
-## Purpose <a name="purpose"></a>
-### What are you going to make? <a name="what"></a>
+### Communication
 
-### Why will you make it? <a name="why"></a>
+All communication between the AppointmentHandler and the rest of the system is done via a broker (excluding the database which is utilising a client/server style), using the MQTT-protocol applying a Publish/Subscribe architectural style.
 
-### How are you going to make it? <a name="how"></a>
+### Error-handling
 
-## Requirements (SRS) <a name="requirements"></a>
+The circuit breaker is specifically significant in the system, because the Appointment Handler contains all data needed for the rest of the components to function. Because of this, a circuit breaker will help reduce recurring failures as well as system failure due to malicious attacks or overload.
 
-## Architecture (SAD) <a name="architecture"></a>
 
-## Developers <a name="developers"></a>
+### How to run 
 
-- [Clementine Jensen](https://github.com/clementinejensen)
-- [Christian O'Neill](https://github.com/Brother-Blue)
-- [Hjalmar Thunberg](https://github.com/Hjalmar-Thunberg)
-- [Hugo Hempel](https://github.com/HugoHempel)
-- [Linus Ivarsson](https://github.com/linusivarssons)
-- [Linus Åberg](https://github.com/LinusAaberg)
+1. Navigate to the server folder in the repository
+1. Open the folder in a terminal
+1. Run "npm install"
+1. Run "npm run dev"
+1. The AppointmentHandler should now be running
