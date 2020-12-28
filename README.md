@@ -15,6 +15,13 @@ The circuit breaker is specifically significant in the system, because the Appoi
 
 ### How to run 
 
+1. Install MQTT-broker
+    1. Download the Mosquitto MQTT-broker from [here](https://mosquitto.org/)
+    1. Locate and open the Mosquitto configuration file (mosquitto.conf)
+    1. Add "#Websockets  
+            listener 9001  
+            protocol websockets"
+    1. Restart the broker
 1. Navigate to the server folder in the repository
 1. Open the folder in a terminal
 1. Run "npm install"
