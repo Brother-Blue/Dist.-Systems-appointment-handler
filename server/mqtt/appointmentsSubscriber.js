@@ -81,7 +81,7 @@ client.on("message", (topic, message) => {
 const insertAppointment = (data) => {
   return new Promise((resolve, reject) => {
     db.collection("appointments")
-      .find({ time: data.time })
+      .find({ time: data.time, dentistid: data.dentistid })
       .toArray()
       .then((appointmentresult) => {
         db.collection("dentistoffices")

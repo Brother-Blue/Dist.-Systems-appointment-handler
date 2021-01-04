@@ -312,7 +312,11 @@ const getTimeSlots = (dentistId, date) => {
             for (let i = 0; i < removeDate.length; i++) {
               timeSlot = timeSlot.filter((val) => !removeDate.includes(val));
             }
-            publish("dentists/offices/timeslots", JSON.stringify(timeSlot), 2);
+            timeslots = {
+              id: dentistId,
+              timeSlots: timeSlot
+            };
+            publish("dentists/offices/timeslots", JSON.stringify(timeslots), 2);
             resolve({ data: "Success" });
           })
           .catch((err) => {
