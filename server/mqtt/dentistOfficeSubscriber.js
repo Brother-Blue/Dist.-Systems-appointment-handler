@@ -57,32 +57,121 @@ client.on("close", () => {
   client.unsubscribe(root + "dentistoffice");
 });
 
+let breakerstate;
+let breaker;
 // On message, run method depending on message
 client.on("message", (topic, message) => {
   let data = JSON.parse(message);
   const method = data.method;
-  let breaker;
 
   switch (method) {
     case "getAll":
       breaker = new CircuitBreaker(getAllDentistOffices(), options);
       breaker.fallback(() => "Sorry, out of service right now");
-      breaker.fire().then(console.log).catch(console.error);
+      breaker.on("open", () => { 
+        if(breakerstate != "opened"){
+          console.log("Circuitbreaker opened");
+          breakerstate = "opened"
+        }
+      })
+      breaker.on("halfOpen", () => { 
+        if(breakerstate != "halfOpen"){
+          console.log("Circuitbreaker halfOpen");
+          breakerstate = "halfOpen"
+        }
+      });
+      /*The opossum librarys eventlistener for the "Closed" state does not work.
+        We decided to work with the "Success" listener and force close it. */
+      breaker.on("success", () => {
+        if(breakerstate != "closed"){
+          breaker.close();
+          console.log("Circuitbreaker closed");
+          breakerstate = "closed";
+        }
+        }
+      );
+      breaker.fire();
       break;
     case "getOne":
       breaker = new CircuitBreaker(getDentistOffice(data.id), options);
       breaker.fallback(() => "Sorry, out of service right now");
-      breaker.fire().then(console.log).catch(console.error);
+      breaker.on("open", () => { 
+        if(breakerstate != "opened"){
+          console.log("Circuitbreaker opened");
+          breakerstate = "opened"
+        }
+      })
+      breaker.on("halfOpen", () => { 
+        if(breakerstate != "halfOpen"){
+          console.log("Circuitbreaker halfOpen");
+          breakerstate = "halfOpen"
+        }
+      });
+      /*The opossum librarys eventlistener for the "Closed" state does not work.
+        We decided to work with the "Success" listener and force close it. */
+      breaker.on("success", () => {
+        if(breakerstate != "closed"){
+          breaker.close();
+          console.log("Circuitbreaker closed");
+          breakerstate = "closed";
+        }
+        }
+      );
+      breaker.fire();
       break;
     case "getAllTimeslots":
       breaker = new CircuitBreaker(getAllTimeslots, options);
       breaker.fallback(() => "Sorry, out of service right now");
-      breaker.fire().then(console.log).catch(console.error);
+      breaker.on("open", () => { 
+        if(breakerstate != "opened"){
+          console.log("Circuitbreaker opened");
+          breakerstate = "opened"
+        }
+      })
+      breaker.on("halfOpen", () => { 
+        if(breakerstate != "halfOpen"){
+          console.log("Circuitbreaker halfOpen");
+          breakerstate = "halfOpen"
+        }
+      });
+      /*The opossum librarys eventlistener for the "Closed" state does not work.
+        We decided to work with the "Success" listener and force close it. */
+      breaker.on("success", () => {
+        if(breakerstate != "closed"){
+          breaker.close();
+          console.log("Circuitbreaker closed");
+          breakerstate = "closed";
+        }
+        }
+      );
+      breaker.fire();
       break;
     case "getTimeSlots":
       breaker = new CircuitBreaker(getTimeSlots(data.id, data.date), options);
       breaker.fallback(() => "Sorry, out of service right now");
-      breaker.fire().then(console.log).catch(console.error);
+      breaker.on("open", () => { 
+        if(breakerstate != "opened"){
+          console.log("Circuitbreaker opened");
+          breakerstate = "opened"
+        }
+      })
+      breaker.on("halfOpen", () => { 
+        if(breakerstate != "halfOpen"){
+          console.log("Circuitbreaker halfOpen");
+          breakerstate = "halfOpen"
+        }
+      });
+      /*The opossum librarys eventlistener for the "Closed" state does not work.
+        We decided to work with the "Success" listener and force close it. */
+      breaker.on("success", () => {
+        if(breakerstate != "closed"){
+          breaker.close();
+          console.log("Circuitbreaker closed");
+          breakerstate = "closed";
+        }
+        }
+      );
+      breaker.fire();
       break;
     default:
       return console.log("Invalid method");
