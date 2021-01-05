@@ -11,7 +11,7 @@ dotenv.config();
 const options = {
   timeout: 10000, //If function takes longer than 10 sec, trigger a failure
   errorHandlingPercentage: 10, //If 10% of requests fail, trigger circuit
-  resetTimeout: 30000, //After 30 seconds try again
+  resetTimeout: 10000, //After 30 seconds try again
 };
 
 let db;
@@ -44,6 +44,8 @@ client.on("connect", (err) => {
   client.subscribe(root + "appointments");
 });
 
+let breakerstate;
+let breaker;
 // On message, run method depending on message
 client.on("message", (topic, message) => {
   let data = JSON.parse(message);
@@ -52,17 +54,83 @@ client.on("message", (topic, message) => {
     case "add":
       breaker = new CircuitBreaker(insertAppointment(data), options);
       breaker.fallback(() => "Sorry, out of service right now");
-      breaker.fire().then(console.log).catch(console.error);
+      breaker.on("open", () => { 
+        if(breakerstate != "opened"){
+          console.log("Circuitbreaker opened");
+          breakerstate = "opened"
+        }
+      })
+      breaker.on("halfOpen", () => { 
+        if(breakerstate != "halfOpen"){
+          console.log("Circuitbreaker halfOpen");
+          breakerstate = "halfOpen"
+        }
+      });
+      /*The opossum librarys eventlistener for the "Closed" state does not work.
+        We decided to work with the "Success" listener and force close it. */
+      breaker.on("success", () => {
+        if(breakerstate != "closed"){
+          breaker.close();
+          console.log("Circuitbreaker closed");
+          breakerstate = "closed";
+        }
+        }
+      );
+      breaker.fire();
       break;
     case "getAll":
       breaker = new CircuitBreaker(getAllAppointments, options);
       breaker.fallback(() => "Sorry, out of service right now");
-      breaker.fire().then(console.log).catch(console.error);
+      breaker.on("open", () => { 
+        if(breakerstate != "opened"){
+          console.log("Circuitbreaker opened");
+          breakerstate = "opened"
+        }
+      })
+      breaker.on("halfOpen", () => { 
+        if(breakerstate != "halfOpen"){
+          console.log("Circuitbreaker halfOpen");
+          breakerstate = "halfOpen"
+        }
+      });
+      /*The opossum librarys eventlistener for the "Closed" state does not work.
+        We decided to work with the "Success" listener and force close it. */
+      breaker.on("success", () => {
+        if(breakerstate != "closed"){
+          breaker.close();
+          console.log("Circuitbreaker closed");
+          breakerstate = "closed";
+        }
+        }
+      );
+      breaker.fire();
       break;
     case "getOne":
       breaker = new CircuitBreaker(getAppointment(data._id), options);
       breaker.fallback(() => "Sorry, out of service right now");
-      breaker.fire().then(console.log).catch(console.error);
+      breaker.on("open", () => { 
+        if(breakerstate != "opened"){
+          console.log("Circuitbreaker opened");
+          breakerstate = "opened"
+        }
+      })
+      breaker.on("halfOpen", () => { 
+        if(breakerstate != "halfOpen"){
+          console.log("Circuitbreaker halfOpen");
+          breakerstate = "halfOpen"
+        }
+      });
+      /*The opossum librarys eventlistener for the "Closed" state does not work.
+        We decided to work with the "Success" listener and force close it. */
+      breaker.on("success", () => {
+        if(breakerstate != "closed"){
+          breaker.close();
+          console.log("Circuitbreaker closed");
+          breakerstate = "closed";
+        }
+        }
+      );
+      breaker.fire();
       break;
     case "getOffice":
       breaker = new CircuitBreaker(
@@ -70,7 +138,29 @@ client.on("message", (topic, message) => {
         options
       );
       breaker.fallback(() => "Sorry, out of service right now");
-      breaker.fire().then(console.log).catch(console.error);
+      breaker.on("open", () => { 
+        if(breakerstate != "opened"){
+          console.log("Circuitbreaker opened");
+          breakerstate = "opened"
+        }
+      })
+      breaker.on("halfOpen", () => { 
+        if(breakerstate != "halfOpen"){
+          console.log("Circuitbreaker halfOpen");
+          breakerstate = "halfOpen"
+        }
+      });
+      /*The opossum librarys eventlistener for the "Closed" state does not work.
+        We decided to work with the "Success" listener and force close it. */
+      breaker.on("success", () => {
+        if(breakerstate != "closed"){
+          breaker.close();
+          console.log("Circuitbreaker closed");
+          breakerstate = "closed";
+        }
+        }
+      );
+      breaker.fire();
       break;
     default:
       return console.log("Invalid method");
@@ -88,8 +178,6 @@ const insertAppointment = (data) => {
           .find({ id: parseInt(data.dentistid) })
           .toArray()
           .then((officeresult) => {
-            console.log("appointmentresult.length " + appointmentresult.length);
-            console.log("officeresult.dentists " + officeresult[0].dentists);
             if (
               appointmentresult == "" ||
               appointmentresult.length < parseInt(officeresult[0].dentists)
@@ -111,7 +199,6 @@ const insertAppointment = (data) => {
                   publish("notifier", payload, 2);
                   publish("log/general", payload, 1);
 
-                  console.log(" >> Appointment added.");
                 })
                 .then(() => {
                   let response = JSON.stringify({
@@ -142,7 +229,6 @@ const insertAppointment = (data) => {
                     success: false,
                   });
 
-                  console.log("Appointment insertion failed");
                   publish("log/error", err, 2);
                   publish("appointments/response", response, 1);
                   reject({ data: "Failure" });
@@ -155,7 +241,6 @@ const insertAppointment = (data) => {
                 success: false,
               });
 
-              console.log("Appointment insertion failed");
               publish("log/error", "Appointment insertion failed", 2);
               publish("appointments/response", response, 1);
               reject({ data: "Failure" });
